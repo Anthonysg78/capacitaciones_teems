@@ -28,6 +28,8 @@
 }
 /* Defensa: el área principal toma el espacio restante (no pisable por CSS ajeno). */
 .lms-app .lms-main { flex: 1 1 auto !important; min-width: 0 !important; }
+/* Emojis convertidos en imagen: que NUNCA se vuelvan gigantes. */
+img.emoji, img.wp-smiley { display: inline !important; height: 1em !important; width: 1em !important; margin: 0 0.07em !important; vertical-align: -0.1em !important; border: 0 !important; box-shadow: none !important; background: none !important; padding: 0 !important; }
 
 /* ============================ SIDEBAR ============================ */
 .lms-side {

@@ -48,6 +48,14 @@ class LMS_Public {
 		if ( ! $this->page_has_shortcode() ) {
 			return;
 		}
+		// Desactivar la conversión de emojis de WordPress en nuestra página:
+		// algunos temas le quitan el estilo que los achica y salen gigantes.
+		// Así el emoji se muestra como texto nativo, pequeño y normal.
+		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+		remove_action( 'wp_print_styles', 'print_emoji_styles' );
+		remove_filter( 'the_content', 'wp_staticize_emoji' );
+		remove_filter( 'the_content_feed', 'wp_staticize_emoji' );
+
 		wp_enqueue_style( 'teems-bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css', array(), '5.3.3' );
 		wp_enqueue_style( 'teems-bootstrap-icons', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css', array(), '1.11.3' );
 		wp_enqueue_style( 'teems-lms-public', TEEMS_LMS_URL . 'diseno/css/lms-public.css', array( 'teems-bootstrap' ), TEEMS_LMS_VERSION );
