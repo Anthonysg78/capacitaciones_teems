@@ -1,0 +1,510 @@
+/* ==========================================================================
+   Capacitaciones Teems — Frontend del LMS
+   Layout: SIDEBAR oscuro + TOPBAR blanco (adaptado de diseño React/Tailwind).
+   Todo dentro de .lms-app para no afectar el resto del sitio.
+   ========================================================================== */
+
+.lms-app {
+	--brand-900: #0b1f4d;   /* navy del sidebar */
+	--brand-800: #102a63;
+	--brand-700: #1d4ed8;
+	--brand-200: #aab8d8;
+	--brand-100: #dbe4f5;
+	--cyan: #22d3ee;
+	--ink: #1e293b;
+	--muted: #64748b;
+	--bg: #f8fafc;
+	--border: #e2e8f0;
+
+	display: flex !important;
+	min-height: 720px;
+	background: var(--bg);
+	color: var(--ink);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	border-radius: 16px;
+	overflow: hidden;
+	box-shadow: 0 14px 44px rgba(11, 31, 77, 0.16);
+	margin: 10px 0 30px;
+}
+/* Defensa: el área principal toma el espacio restante (no pisable por CSS ajeno). */
+.lms-app .lms-main { flex: 1 1 auto !important; min-width: 0 !important; }
+
+/* ============================ SIDEBAR ============================ */
+.lms-side {
+	width: 256px;
+	flex: none;
+	background: var(--brand-900);
+	color: #fff;
+	display: flex;
+	flex-direction: column;
+}
+.lms-side__brand {
+	display: flex; align-items: center; gap: 10px;
+	height: 64px; padding: 0 22px;
+	border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+.lms-side__logo {
+	display: grid; place-items: center;
+	height: 38px; width: 38px; border-radius: 10px;
+	background: var(--cyan); color: var(--brand-900);
+	font-size: 19px;
+}
+.lms-side__brandtext { display: flex; flex-direction: column; line-height: 1.1; }
+.lms-side__brandtext strong { font-size: 15px; font-weight: 800; }
+.lms-side__brandtext small { font-size: 11px; color: var(--brand-200); }
+
+.lms-side__nav { flex: 1; padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; }
+.lms-side__link {
+	display: flex; align-items: center; gap: 12px;
+	padding: 11px 14px; border-radius: 10px;
+	color: var(--brand-100) !important;
+	text-decoration: none !important;
+	font-size: 14px; font-weight: 600;
+	transition: background 0.15s ease, color 0.15s ease;
+}
+.lms-side__link i { font-size: 17px; }
+.lms-side__link:hover { background: rgba(255,255,255,0.06); color: #fff !important; }
+.lms-side__link.is-active { background: rgba(255,255,255,0.12); color: #fff !important; }
+
+.lms-side__foot { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.10); }
+
+/* ============================ MAIN ============================ */
+.lms-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+/* ---- Topbar ---- */
+.lms-topbar {
+	height: 64px; flex: none;
+	background: #fff; border-bottom: 1px solid var(--border);
+	display: flex; align-items: center; justify-content: space-between;
+	padding: 0 26px; gap: 16px;
+}
+.lms-topbar__brand-mobile { display: none; font-weight: 800; color: var(--brand-900); }
+.lms-topbar__greet { font-size: 14px; color: var(--muted); }
+.lms-topbar__greet span { font-weight: 700; color: var(--ink); }
+.lms-topbar__right { display: flex; align-items: center; gap: 18px; }
+
+.lms-bell {
+	position: relative; background: none; border: none; cursor: pointer;
+	color: #94a3b8; font-size: 19px; line-height: 1; padding: 4px;
+}
+.lms-bell:hover { color: #475569; }
+.lms-bell__dot { position: absolute; top: 2px; right: 2px; height: 8px; width: 8px; border-radius: 50%; background: #ef4444; }
+
+.lms-userbox { display: flex; align-items: center; gap: 10px; }
+.lms-userbox__avatar {
+	height: 38px; width: 38px; border-radius: 50%;
+	background: var(--brand-100); color: var(--brand-700);
+	display: grid; place-items: center; font-weight: 800; font-size: 14px;
+}
+.lms-userbox__info { display: flex; flex-direction: column; line-height: 1.15; }
+.lms-userbox__info strong { font-size: 14px; color: var(--ink); }
+.lms-userbox__info small { font-size: 11px; color: var(--muted); }
+
+/* ---- Content ---- */
+.lms-content { flex: 1; overflow-y: auto; padding: 30px 34px 40px; }
+
+.lms-pagehead { margin-bottom: 24px; }
+.lms-pagehead h1 { font-size: 24px; font-weight: 800; margin: 0; color: var(--ink); }
+.lms-pagehead p { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+.lms-pagehead--row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+/* ---- Avisos (notices) ---- */
+.lms-notice { display: flex; align-items: center; gap: 9px; padding: 13px 16px; border-radius: 10px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+.lms-notice--ok  { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+.lms-notice--err { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+
+/* ---- Tabla ---- */
+.lms-tablewrap { background: #fff; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.lms-table { width: 100%; border-collapse: collapse; }
+.lms-table thead th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); background: #f8fafc; padding: 13px 16px; border-bottom: 1px solid var(--border); }
+.lms-table tbody td { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+.lms-table tbody tr:last-child td { border-bottom: none; }
+.lms-table tbody tr:hover { background: #f8fafc; }
+.lms-table__title { font-weight: 700; color: var(--ink); }
+.lms-table__actions { text-align: right; white-space: nowrap; }
+
+.lms-tag { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 4px 11px; border-radius: 999px; }
+.lms-tag--ok    { background: #ecfdf5; color: #047857; }
+.lms-tag--draft { background: #f1f5f9; color: #64748b; }
+
+.lms-iconbtn { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; color: var(--brand-700) !important; background: var(--brand-100); text-decoration: none !important; margin-left: 6px; transition: background 0.15s ease, color 0.15s ease; }
+.lms-iconbtn:hover { background: var(--brand-700); color: #fff !important; }
+.lms-iconbtn--primary { color: #047857 !important; background: #d1fae5; }
+.lms-iconbtn--primary:hover { background: #059669; color: #fff !important; }
+.lms-iconbtn--danger { color: #b91c1c !important; background: #fee2e2; }
+.lms-iconbtn--danger:hover { background: #dc2626; color: #fff !important; }
+
+/* ---- Migas de pan (breadcrumb) ---- */
+.lms-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--muted); margin-bottom: 16px; }
+.lms-breadcrumb a { color: var(--brand-700) !important; text-decoration: none !important; font-weight: 600; }
+.lms-breadcrumb a:hover { text-decoration: underline !important; }
+.lms-breadcrumb strong { color: var(--ink); }
+
+/* ---- Número de orden ---- */
+.lms-ordernum { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--brand-100); color: var(--brand-700); font-weight: 800; font-size: 13px; }
+
+/* ---- Formulario ---- */
+.lms-form { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 26px 26px 24px; max-width: 640px; }
+.lms-field { margin-bottom: 20px; }
+.lms-field label { display: block; font-weight: 700; font-size: 14px; margin-bottom: 7px; color: var(--ink); }
+.lms-field input[type="text"], .lms-field textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; padding: 11px 13px; font-size: 14px; font-family: inherit; color: var(--ink); background: #fff; }
+.lms-field input[type="text"]:focus, .lms-field textarea:focus { outline: none; border-color: var(--brand-700); box-shadow: 0 0 0 3px rgba(29,78,216,0.12); }
+.lms-field--check label { font-weight: 500; display: flex; align-items: center; gap: 9px; cursor: pointer; }
+.lms-field--check input { width: 18px; height: 18px; }
+.lms-req { color: #dc2626; }
+.lms-form__actions { display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+.lms-btn-ghost { background: transparent; border: 0; cursor: pointer; font-family: inherit; color: var(--muted) !important; text-decoration: none !important; font-weight: 600; font-size: 14px; padding: 10px 14px; border-radius: 10px; }
+.lms-btn-ghost:hover { background: #f1f5f9 !important; color: var(--ink) !important; }
+/* Campos extra (select, url) con el mismo look que los de texto */
+.lms-field select, .lms-field input[type="url"] { width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; padding: 11px 13px; font-size: 14px; font-family: inherit; color: var(--ink); background: #fff; }
+.lms-field select:focus, .lms-field input[type="url"]:focus { outline: none; border-color: var(--brand-700); box-shadow: 0 0 0 3px rgba(29,78,216,0.12); }
+.lms-help { margin: 7px 0 0; font-size: 12.5px; color: var(--muted); }
+
+/* ---- Distintivo de tipo de contenido ---- */
+.lms-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 700; line-height: 1; }
+.lms-badge--texto   { background: #eef2ff; color: #4338ca; }
+.lms-badge--video   { background: #fef2f2; color: #b91c1c; }
+.lms-badge--pdf     { background: #fff7ed; color: #c2410c; }
+.lms-badge--recurso { background: #ecfdf5; color: #047857; }
+
+/* ============================ EDITOR DE ESTRUCTURA (árbol) ============================ */
+.lms-back { display: inline-flex; align-items: center; gap: 7px; color: var(--muted) !important; text-decoration: none !important; font-weight: 600; font-size: 14px; margin-bottom: 16px; }
+.lms-back:hover { color: var(--brand-700) !important; }
+
+/* Cabecera de datos del curso */
+.lms-coursecard { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px; margin-bottom: 24px; }
+.lms-eyebrow { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand-700); margin-bottom: 6px; }
+.lms-coursecard__title { font-size: 24px; font-weight: 800; margin: 0; color: var(--ink); }
+.lms-coursecard__desc { margin: 8px 0 0; color: var(--muted); font-size: 14.5px; max-width: 60ch; }
+.lms-btn-outline--sm { padding: 8px 14px; font-size: 13.5px; white-space: nowrap; }
+
+/* Barra de sección */
+.lms-sectionbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.lms-sectionbar__title { font-size: 18px; font-weight: 800; margin: 0; color: var(--ink); }
+
+/* Árbol */
+.lms-tree { display: flex; flex-direction: column; gap: 12px; }
+
+/* Nodo (módulo / subtema) */
+.lms-tnode { border-radius: 14px; }
+.lms-tnode--mod { background: #fff; border: 1px solid var(--border); box-shadow: 0 6px 18px rgba(11,31,77,0.06); }
+.lms-tnode--sub { border: 1px solid var(--border); background: #fff; }
+
+.lms-tnode__head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; }
+.lms-tnode--sub .lms-tnode__head { background: #f8fafc; border-radius: 14px 14px 0 0; padding: 11px 14px; }
+.lms-tnode--sub:not(.is-open) .lms-tnode__head { border-radius: 14px; }
+
+.lms-tnode__chevron { border: 0; background: transparent; cursor: pointer; color: var(--muted); font-size: 15px; padding: 4px; line-height: 1; border-radius: 6px; }
+.lms-tnode__chevron:hover { background: #eef2f7; color: var(--ink); }
+.lms-tnode__chevron i { transition: transform 0.15s ease; display: block; }
+.lms-tnode:not(.is-open) > .lms-tnode__head .lms-tnode__chevron i { transform: rotate(-90deg); }
+
+.lms-grip { color: #cbd5e1; cursor: grab; font-size: 15px; line-height: 1; }
+.lms-grip:hover { color: #94a3b8; }
+
+.lms-tbadge { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--brand-100); color: var(--brand-700); font-weight: 800; font-size: 14px; flex: none; }
+
+.lms-tnode__titles { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.lms-tnode__title { font-weight: 700; color: var(--ink); font-size: 15px; line-height: 1.3; }
+.lms-tnode--sub .lms-tnode__title { font-size: 14px; }
+.lms-tnode__sub { font-size: 12.5px; color: var(--muted); }
+
+.lms-tnode__actions { display: flex; align-items: center; gap: 6px; flex: none; }
+
+/* Cuerpo colapsable */
+.lms-tnode__body { display: none; }
+.lms-tnode.is-open > .lms-tnode__body { display: block; }
+.lms-tnode--mod > .lms-tnode__body { padding: 6px 16px 16px; border-top: 1px solid var(--border); background: rgba(248,250,252,0.5); display: none; }
+.lms-tnode--mod.is-open > .lms-tnode__body { display: flex; flex-direction: column; gap: 10px; }
+.lms-tnode--mod > .lms-tnode__body { margin-top: 0; }
+.lms-tnode--sub > .lms-tnode__body { padding: 6px 12px 12px; }
+
+/* Hoja: contenido (nivel 3) */
+.lms-tleaf { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px; margin-left: 16px; }
+.lms-tleaf:hover { background: #f1f5f9; }
+.lms-tleaf__icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: #eef2f7; color: var(--muted); font-size: 15px; flex: none; }
+.lms-tleaf--texto   .lms-tleaf__icon { background: #eef2ff; color: #4338ca; }
+.lms-tleaf--video   .lms-tleaf__icon { background: #fef2f2; color: #b91c1c; }
+.lms-tleaf--pdf     .lms-tleaf__icon { background: #fff7ed; color: #c2410c; }
+.lms-tleaf--recurso .lms-tleaf__icon { background: #ecfdf5; color: #047857; }
+.lms-tleaf__title { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lms-tleaf__type { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #94a3b8; flex: none; }
+.lms-tleaf__actions { display: flex; align-items: center; gap: 5px; flex: none; opacity: 0; transition: opacity 0.12s ease; }
+.lms-tleaf:hover .lms-tleaf__actions { opacity: 1; }
+
+/* Botones "Añadir …" contextuales */
+.lms-tadd { display: inline-flex; align-items: center; gap: 6px; margin-left: 16px; margin-top: 2px; padding: 7px 4px; background: transparent; border: 0; cursor: pointer; font-family: inherit; color: var(--brand-700) !important; text-decoration: none !important; font-weight: 700; font-size: 13px; width: fit-content; }
+.lms-tadd:hover { background: transparent !important; text-decoration: underline !important; }
+.lms-tadd--sub { margin-left: 0; }
+
+.lms-tempty { margin: 4px 0 6px 16px; font-size: 13px; color: var(--muted); font-style: italic; }
+
+.lms-treefoot { display: flex; align-items: flex-start; gap: 8px; margin: 22px 0 0; font-size: 12.5px; color: var(--muted); }
+.lms-treefoot i { margin-top: 1px; }
+
+/* ============================ VISOR DEL ESTUDIANTE ============================ */
+.lms-viewer { display: flex; flex-direction: column; gap: 18px; }
+.lms-vmod { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 20px 22px; box-shadow: 0 6px 18px rgba(11,31,77,0.06); }
+.lms-vmod__head { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+.lms-vmod__title { font-size: 19px; font-weight: 800; margin: 0; color: var(--ink); }
+
+.lms-vsub { padding: 4px 0 4px 6px; }
+.lms-vsub + .lms-vsub { border-top: 1px dashed var(--border); margin-top: 14px; padding-top: 16px; }
+.lms-vsub__title { font-size: 15.5px; font-weight: 700; margin: 0 0 4px; color: var(--ink); }
+.lms-vsub__desc { font-size: 13.5px; color: var(--muted); margin: 0 0 12px; }
+
+.lms-vcontent { border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-top: 10px; background: #fff; }
+.lms-vcontent__head { display: flex; align-items: center; gap: 10px; }
+.lms-vcontent__title { flex: 1; min-width: 0; font-size: 14.5px; font-weight: 700; color: var(--ink); }
+.lms-vcontent--texto   .lms-tleaf__icon { background: #eef2ff; color: #4338ca; }
+.lms-vcontent--video   .lms-tleaf__icon { background: #fef2f2; color: #b91c1c; }
+.lms-vcontent--pdf     .lms-tleaf__icon { background: #fff7ed; color: #c2410c; }
+.lms-vcontent--recurso .lms-tleaf__icon { background: #ecfdf5; color: #047857; }
+.lms-vcontent__text { margin-top: 10px; color: #334155; font-size: 14.5px; line-height: 1.65; }
+.lms-vcontent__text p { margin: 0 0 10px; }
+.lms-vcontent__text p:last-child { margin-bottom: 0; }
+.lms-vcontent .lms-btn-outline { margin-top: 12px; }
+.lms-vcontent.is-done { border-color: #bbf7d0; background: #f0fdf4; }
+
+/* Barra de avance del curso (cabecera del visor) */
+.lms-vprogress { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; margin-bottom: 22px; }
+.lms-vprogress__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.lms-vprogress__label { font-weight: 700; color: var(--ink); font-size: 14.5px; }
+.lms-vprogress__num { color: var(--muted); font-size: 13.5px; }
+.lms-vprogress__num strong { color: var(--brand-700); font-size: 15px; }
+
+/* Botón "marcar como completado" */
+.lms-vcontent__foot { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); }
+.lms-checkbtn { display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid #cbd5e1; background: #fff; color: var(--muted); border-radius: 10px; padding: 8px 14px; font-size: 13.5px; font-weight: 700; cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease; }
+.lms-checkbtn:hover { border-color: #16a34a; color: #16a34a; }
+.lms-checkbtn i { font-size: 16px; }
+.lms-checkbtn.is-done { border-color: #16a34a; background: #16a34a; color: #fff; }
+.lms-checkbtn.is-done:hover { background: #15803d; border-color: #15803d; color: #fff; }
+
+/* ============================ EVALUACIÓN — LADO ESTUDIANTE ============================ */
+/* Botón de evaluación dentro del módulo (visor) */
+.lms-vexam { display: flex; align-items: center; gap: 14px; margin-top: 16px; padding: 14px 18px; border: 1px solid var(--border); border-radius: 12px; background: #f8fafc; text-decoration: none !important; color: var(--ink) !important; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.lms-vexam:hover { border-color: var(--brand-700); box-shadow: 0 8px 22px rgba(11,31,77,0.10); }
+.lms-vexam.is-ok { background: #f0fdf4; border-color: #bbf7d0; }
+.lms-vexam__icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 11px; background: #ecfeff; color: #0891b2; font-size: 20px; flex: none; }
+.lms-vexam.is-ok .lms-vexam__icon { background: #dcfce7; color: #16a34a; }
+.lms-vexam__txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.lms-vexam__txt strong { font-size: 15px; }
+.lms-vexam__txt span { font-size: 13px; color: var(--muted); }
+.lms-vexam__go { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13.5px; color: var(--brand-700); flex: none; }
+
+/* Examen (preguntas) */
+.lms-quiz { display: flex; flex-direction: column; gap: 14px; }
+.lms-qbox { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; box-shadow: 0 6px 18px rgba(11,31,77,0.06); }
+.lms-qbox__text { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 14px; font-weight: 700; color: var(--ink); font-size: 15.5px; line-height: 1.4; }
+.lms-qbox__hint { font-size: 12px; font-weight: 600; color: #0891b2; background: #ecfeff; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.lms-qbox__opts { display: flex; flex-direction: column; gap: 8px; }
+.lms-opt { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: border-color 0.12s ease, background 0.12s ease; }
+.lms-opt:hover { border-color: var(--brand-200); background: #f8fafc; }
+.lms-opt input { width: 18px; height: 18px; flex: none; accent-color: var(--brand-700); cursor: pointer; }
+.lms-opt span { font-size: 14.5px; color: var(--ink); }
+.lms-quiz__foot { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+
+/* Resultado / estado */
+.lms-evalresult { display: flex; align-items: center; gap: 14px; padding: 18px 20px; border-radius: 14px; margin-bottom: 18px; border: 1px solid var(--border); }
+.lms-evalresult i { font-size: 30px; flex: none; }
+.lms-evalresult strong { display: block; font-size: 16px; }
+.lms-evalresult span { font-size: 13.5px; color: var(--muted); }
+.lms-evalresult--ok { background: #f0fdf4; border-color: #bbf7d0; } .lms-evalresult--ok i { color: #16a34a; }
+.lms-evalresult--fail { background: #fef2f2; border-color: #fecaca; } .lms-evalresult--fail i { color: #dc2626; }
+.lms-evalresult--info { background: #eff6ff; border-color: #bfdbfe; } .lms-evalresult--info i { color: #2563eb; }
+
+/* Retroalimentación */
+.lms-feedback { display: flex; flex-direction: column; gap: 12px; }
+.lms-fbq { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+.lms-fbq__text { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 12px; font-weight: 700; color: var(--ink); font-size: 15px; }
+.lms-fbq__mark { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; flex: none; color: #fff; font-size: 13px; }
+.lms-fbq__mark--ok { background: #16a34a; }
+.lms-fbq__mark--no { background: #dc2626; }
+.lms-fbopts { list-style: none; margin: 0; padding: 0 0 0 34px; display: flex; flex-direction: column; gap: 6px; }
+.lms-fbopt { display: flex; align-items: center; gap: 9px; font-size: 14px; color: var(--muted); padding: 6px 10px; border-radius: 8px; }
+.lms-fbopt i { font-size: 16px; color: #cbd5e1; flex: none; }
+.lms-fbopt.is-correct { background: #f0fdf4; color: #15803d; font-weight: 600; } .lms-fbopt.is-correct i { color: #16a34a; }
+.lms-fbopt.is-wrong { background: #fef2f2; color: #b91c1c; } .lms-fbopt.is-wrong i { color: #dc2626; }
+.lms-fbopt__tag { margin-left: auto; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; opacity: 0.8; }
+
+/* ============================ EVALUACIÓN DEL MÓDULO (en el árbol) ============================ */
+.lms-eval { margin-top: 14px; padding: 14px; border: 1px dashed #cbd5e1; border-radius: 12px; background: #fff; }
+.lms-eval__head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.lms-eval__icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: #ecfeff; color: #0891b2; font-size: 16px; flex: none; }
+.lms-evalq { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; }
+.lms-evalq:hover { background: #f8fafc; }
+.lms-evalq__num { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; background: var(--brand-100); color: var(--brand-700); font-weight: 800; font-size: 12px; flex: none; }
+.lms-evalq__text { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lms-evalq__actions { display: flex; align-items: center; gap: 5px; flex: none; }
+
+/* Switch "varias correctas" */
+.lms-switchrow { display: flex; align-items: center; gap: 10px; margin: 4px 0 16px; }
+.lms-switchrow__label { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.lms-switch { position: relative; display: inline-block; width: 42px; height: 24px; flex: none; }
+.lms-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.lms-switch__slider { position: absolute; inset: 0; background: #cbd5e1; border-radius: 999px; transition: background 0.15s ease; cursor: pointer; }
+.lms-switch__slider::before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
+.lms-switch input:checked + .lms-switch__slider { background: var(--brand-700); }
+.lms-switch input:checked + .lms-switch__slider::before { transform: translateX(18px); }
+
+/* Filas de opciones en el modal de pregunta */
+.lms-help-inline { font-weight: 600; color: var(--muted); font-size: 12.5px; }
+.lms-qoptrow { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.lms-qoptrow .lms-correctbox { width: 19px; height: 19px; flex: none; cursor: pointer; accent-color: #16a34a; }
+.lms-qoptrow input[type="text"] { flex: 1; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 12px; font-size: 14px; font-family: inherit; color: var(--ink); }
+.lms-qoptrow input[type="text"]:focus { outline: none; border-color: var(--brand-700); box-shadow: 0 0 0 3px rgba(29,78,216,0.12); }
+.lms-optdel { flex: none; border: 0; background: transparent; color: #cbd5e1; cursor: pointer; padding: 6px; border-radius: 8px; line-height: 1; font-size: 14px; }
+.lms-optdel:hover { background: #fef2f2; color: #dc2626; }
+
+/* Modales (crear/editar sin salir del árbol) */
+.lms-modal .modal-content { border: 0; border-radius: 16px; box-shadow: 0 24px 60px rgba(11,31,77,0.28); overflow: hidden; }
+.lms-modal .modal-header { border-bottom: 1px solid var(--border); padding: 18px 22px; }
+.lms-modal .modal-title { font-size: 18px; font-weight: 800; color: var(--ink); }
+.lms-modal .modal-body { padding: 20px 22px 6px; }
+.lms-modal .modal-body .lms-field:last-child { margin-bottom: 4px; }
+.lms-modal .modal-footer { border-top: 1px solid var(--border); padding: 14px 22px; gap: 10px; }
+.lms-modal .modal-footer > * { margin: 0; }
+
+/* ---- Stats ---- */
+.lms-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px; }
+.lms-stat { display: flex; align-items: center; gap: 16px; background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
+.lms-stat i { font-size: 24px; color: var(--brand-700); background: var(--brand-100); padding: 12px; border-radius: 12px; }
+.lms-stat__num { display: block; font-size: 25px; font-weight: 800; line-height: 1; }
+.lms-stat__lbl { display: block; font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+/* ---- Section title ---- */
+.lms-section-title { font-size: 19px; font-weight: 800; margin: 0 0 16px; }
+
+/* ---- Course cards ---- */
+.lms-courses { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+.lms-course { background: #fff; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.16s ease, box-shadow 0.16s ease; }
+.lms-course:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(11,31,77,0.14); }
+.lms-course__cover { height: 110px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.92); font-size: 42px; }
+.lms-course__body { padding: 18px; display: flex; flex-direction: column; flex: 1; }
+.lms-course__title { font-size: 16px; font-weight: 700; margin: 0 0 6px; }
+.lms-course__desc { font-size: 13px; color: var(--muted); margin: 0 0 14px; line-height: 1.5; flex: 1; }
+.lms-course__meta { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
+.lms-course__pct { font-weight: 800; color: var(--ink); }
+.lms-progress { height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-bottom: 16px; }
+.lms-progress__bar { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
+.lms-course__btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--brand-700); color: #fff !important; text-decoration: none !important; padding: 10px 16px; border-radius: 10px; font-weight: 700; font-size: 14px; transition: background 0.15s ease; }
+.lms-course__btn:hover { background: var(--brand-900); }
+
+/* Portada de la tarjeta de curso (admin): etiqueta + icono en esquinas */
+.lms-course__cover { position: relative; }
+.lms-course__coverico { position: absolute; top: 16px; right: 18px; font-size: 30px; color: rgba(255,255,255,0.85); }
+.lms-course__covertag { position: absolute; top: 14px; left: 16px; font-size: 11px; font-weight: 700; padding: 4px 11px; border-radius: 999px; background: rgba(255,255,255,0.22); color: #fff; }
+.lms-course__covertag.is-pub { background: #10b981; }
+
+/* Botón "Editar estructura" (outline, ancho completo) */
+.lms-btn-outline { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 11px 14px; border: 1.5px solid #c7d2fe; border-radius: 10px; background: #fff; color: var(--brand-700) !important; font-weight: 700; font-size: 14px; text-decoration: none !important; transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
+.lms-btn-outline:hover { background: var(--brand-700); color: #fff !important; border-color: var(--brand-700); }
+
+/* Pie de la tarjeta con acciones secundarias */
+.lms-cardfoot { display: flex; justify-content: flex-end; gap: 6px; margin-top: 10px; }
+
+/* ---- Empty state ---- */
+.lms-empty { text-align: center; background: #fff; border: 1px dashed var(--border); border-radius: 14px; padding: 54px 20px; color: var(--muted); }
+.lms-empty i { font-size: 52px; color: #cbd5e1; display: block; margin-bottom: 14px; }
+.lms-empty p { margin: 0 0 14px; font-size: 15px; }
+
+/* ---- Insignia de rol (topbar) ---- */
+.lms-rolebadge { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; padding: 5px 12px; border-radius: 999px; }
+.lms-rolebadge--admin      { background: #ede9fe; color: #6d28d9; }
+.lms-rolebadge--empresa    { background: #d1fae5; color: #047857; }
+.lms-rolebadge--estudiante { background: var(--brand-100); color: var(--brand-700); }
+
+/* ---- Accesos rápidos (admin) ---- */
+.lms-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 8px; }
+.lms-action {
+	display: flex; align-items: center; gap: 14px;
+	background: #fff; border: 1px solid var(--border); border-radius: 14px;
+	padding: 18px 20px; text-decoration: none !important; color: var(--ink) !important;
+	font-weight: 700; font-size: 15px;
+	transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.lms-action:hover { transform: translateY(-3px); box-shadow: 0 12px 26px rgba(11,31,77,0.12); border-color: var(--brand-700); }
+.lms-action i { font-size: 22px; color: var(--brand-700); background: var(--brand-100); padding: 12px; border-radius: 12px; }
+
+/* ---- Demo note ---- */
+.lms-demo-note { margin-top: 26px; padding: 12px 16px; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; border-radius: 10px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+
+/* ============================ LOGIN / SELECTOR DE ROL ============================ */
+.lms-login {
+	min-height: 100vh;
+	display: flex; align-items: center; justify-content: center;
+	padding: 30px 16px;
+	background: linear-gradient(135deg, #0b1f4d 0%, #1d4ed8 100%);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.lms-login__box {
+	background: #fff; border-radius: 20px; padding: 40px 36px;
+	width: 100%; max-width: 760px; text-align: center;
+	box-shadow: 0 24px 60px rgba(0,0,0,0.30);
+}
+.lms-login__brand { display: inline-flex; align-items: center; gap: 10px; font-size: 18px; color: #0b1f4d; margin-bottom: 18px; }
+.lms-login__brand strong { font-weight: 800; }
+.lms-login__logo { display: grid; place-items: center; height: 40px; width: 40px; border-radius: 11px; background: #22d3ee; color: #0b1f4d; font-size: 20px; }
+.lms-login__title { font-size: 26px; font-weight: 800; margin: 0; color: #1e293b; }
+.lms-login__sub { color: #64748b; margin: 8px 0 28px; font-size: 15px; }
+
+.lms-login__opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; }
+.lms-login__opt {
+	display: flex; flex-direction: column; align-items: center; gap: 6px;
+	padding: 26px 18px; border-radius: 16px; border: 2px solid #e2e8f0;
+	text-decoration: none !important; color: #1e293b !important;
+	transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.lms-login__opt:hover { transform: translateY(-5px); box-shadow: 0 16px 32px rgba(11,31,77,0.16); }
+.lms-login__opt i { font-size: 34px; margin-bottom: 6px; }
+.lms-login__optname { font-size: 17px; font-weight: 800; }
+.lms-login__optdesc { font-size: 12.5px; color: #64748b; }
+.lms-login__opt--admin:hover { border-color: #6d28d9; }
+.lms-login__opt--admin i { color: #6d28d9; }
+.lms-login__opt--empresa:hover { border-color: #047857; }
+.lms-login__opt--empresa i { color: #047857; }
+.lms-login__opt--est:hover { border-color: #1d4ed8; }
+.lms-login__opt--est i { color: #1d4ed8; }
+
+.lms-login__logout { display: inline-flex; align-items: center; gap: 7px; margin-top: 28px; color: #94a3b8 !important; text-decoration: none !important; font-size: 13.5px; font-weight: 600; }
+.lms-login__logout:hover { color: #475569 !important; }
+.lms-login__note { margin: 14px 0 0; font-size: 12px; color: #cbd5e1; }
+
+/* ============================ PANTALLA COMPLETA ============================ */
+/* Cuando se usa la plantilla propia del plugin, el body lleva .lms-fullscreen */
+html.lms-fullscreen, body.lms-fullscreen {
+	margin: 0 !important;
+	padding: 0 !important;
+	background: #f8fafc;
+}
+body.lms-fullscreen .lms-app {
+	margin: 0;
+	border-radius: 0;
+	box-shadow: none;
+	height: 100vh;
+	min-height: 100vh;
+}
+/* Si está la barra de administrador de WordPress, descontamos su alto. */
+body.lms-fullscreen.admin-bar .lms-app { height: calc(100vh - 32px); min-height: calc(100vh - 32px); }
+@media screen and (max-width: 782px) {
+	body.lms-fullscreen.admin-bar .lms-app { height: calc(100vh - 46px); min-height: calc(100vh - 46px); }
+}
+
+/* ============================ RESPONSIVE ============================ */
+@media (max-width: 820px) {
+	.lms-app { flex-direction: column; }
+	body.lms-fullscreen .lms-app { height: auto; min-height: 100vh; }
+	.lms-side { width: 100%; flex-direction: row; align-items: center; overflow-x: auto; }
+	.lms-side__brand { border-bottom: none; border-right: 1px solid rgba(255,255,255,0.10); flex: none; }
+	.lms-side__brandtext { display: none; }
+	.lms-side__nav { flex-direction: row; padding: 8px; gap: 4px; }
+	.lms-side__foot { border-top: none; border-left: 1px solid rgba(255,255,255,0.1); padding: 8px; }
+	.lms-side__link span { display: none; }
+	.lms-side__link { padding: 11px 13px; }
+	.lms-topbar { padding: 0 16px; }
+	.lms-topbar__greet { display: none; }
+	.lms-userbox__info { display: none; }
+	.lms-content { padding: 22px 16px 30px; }
+	.lms-pagehead h1 { font-size: 21px; }
+}
