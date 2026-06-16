@@ -28,7 +28,7 @@ $db_ok = ( 17 === $tablas_existentes );
 <div class="wrap lms-wrap">
 
 	<div class="lms-hero">
-		<div class="lms-hero__icon">🎓</div>
+		<div class="lms-hero__icon"><span class="dashicons dashicons-welcome-learn-more"></span></div>
 		<div>
 			<h1 class="lms-hero__title">Capacitaciones Teems</h1>
 			<p class="lms-hero__subtitle">Plataforma de capacitación empresarial · Panel de administración</p>
@@ -60,7 +60,7 @@ $db_ok = ( 17 === $tablas_existentes );
 
 	<!-- Próximos pasos -->
 	<div class="lms-panel">
-		<h2 class="lms-panel__title">📋 Próximos pasos del proyecto</h2>
+		<h2 class="lms-panel__title">Próximos pasos del proyecto</h2>
 		<ul class="lms-steps">
 			<li class="lms-steps__done">Semana 1 — Estructura base y 17 tablas de la base de datos</li>
 			<li class="lms-steps__current">Semana 2 — Roles del sistema, invitaciones y activación de cuenta</li>

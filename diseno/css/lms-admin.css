@@ -20,7 +20,8 @@
 	box-shadow: 0 8px 24px rgba(67, 56, 202, 0.25);
 	position: relative;
 }
-.lms-hero__icon { font-size: 46px; line-height: 1; }
+.lms-hero__icon { font-size: 46px; line-height: 1; display: flex; }
+.lms-hero__icon .dashicons { font-size: 46px; width: 46px; height: 46px; line-height: 1; color: #fff; }
 .lms-hero__title { color: #fff; margin: 0; font-size: 26px; font-weight: 700; }
 .lms-hero__subtitle { margin: 4px 0 0; opacity: 0.85; font-size: 14px; }
 .lms-badge-version {

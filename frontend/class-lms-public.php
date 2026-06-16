@@ -460,11 +460,11 @@ class LMS_Public {
 
 	private function content_estudiante( $vista ) {
 		if ( 'certificados' === $vista ) {
-			$this->view( 'student/empty', array( 'titulo' => 'Mis Certificados 🏆', 'icono' => 'bi-award', 'texto' => 'Aún no tienes certificados. Completa y aprueba un módulo para obtener el tuyo.' ) );
+			$this->view( 'student/empty', array( 'titulo' => 'Mis Certificados', 'icono' => 'bi-award', 'texto' => 'Aún no tienes certificados. Completa y aprueba un módulo para obtener el tuyo.' ) );
 			return;
 		}
 		if ( 'insignias' === $vista ) {
-			$this->view( 'student/empty', array( 'titulo' => 'Mis Insignias 🎖️', 'icono' => 'bi-patch-check', 'texto' => 'Todavía no has ganado insignias. ¡Completa módulos para desbloquearlas!' ) );
+			$this->view( 'student/empty', array( 'titulo' => 'Mis Insignias', 'icono' => 'bi-patch-check', 'texto' => 'Todavía no has ganado insignias. ¡Completa módulos para desbloquearlas!' ) );
 			return;
 		}
 

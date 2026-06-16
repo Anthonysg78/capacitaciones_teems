@@ -3,7 +3,7 @@
  * Plugin Name:       Capacitaciones Teems
  * Plugin URI:        https://teems.local
  * Description:       Plataforma de capacitación empresarial privada (LMS) para WordPress. Empresas, cursos, evaluaciones, certificados con QR e insignias. Acceso solo por invitación.
- * Version:           0.10.5
+ * Version:           0.11.1
  * Requires at least: 6.0
  * Requires PHP:      8.0
  * Author:            Accons
@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * - URL:     dirección web pública (para cargar CSS, JS, imágenes).
  * - BASENAME: identificador del plugin que usa WordPress internamente.
  */
-define( 'TEEMS_LMS_VERSION', '0.10.5' );
+define( 'TEEMS_LMS_VERSION', '0.11.1' );
 define( 'TEEMS_LMS_PATH', plugin_dir_path( __FILE__ ) );   // termina en \
 define( 'TEEMS_LMS_URL', plugin_dir_url( __FILE__ ) );     // termina en /
 define( 'TEEMS_LMS_BASENAME', plugin_basename( __FILE__ ) );

@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <div class="lms-pagehead">
 	<h1>Continúa tu aprendizaje</h1>
-	<p>Tienes <strong><?php echo esc_html( $en_curso ); ?></strong> curso(s) en progreso. ¡Sigue así! 🚀</p>
+	<p>Tienes <strong><?php echo esc_html( $en_curso ); ?></strong> curso(s) en progreso. ¡Sigue así!</p>
 </div>
 
 <div class="lms-stats">
