@@ -1,22 +1,22 @@
 <?php
 /**
- * Vista: EDITOR DE ESTRUCTURA del curso (árbol anidado de 3 niveles).
+ * Vista: EDITOR DE ESTRUCTURA del curso (árbol de 2 niveles).
  *
- * Muestra Módulo → Subtema → Contenido en una sola pantalla, con tarjetas
- * colapsables. Crear/editar usa MODALES (Bootstrap) que se abren sin salir de
- * esta página; el formulario se envía normal y vuelve aquí.
+ * Muestra Módulo → Contenido en una sola pantalla, con tarjetas colapsables.
+ * Cada módulo lleva además su Evaluación (banco de preguntas). Crear/editar usa
+ * MODALES (Bootstrap) que se abren sin salir de esta página; el formulario se
+ * envía normal y vuelve aquí.
  *
  * Mejora progresiva: cada botón "Añadir/Editar" conserva su enlace a la página
  * del formulario, así que si el JS no carga, la navegación sigue funcionando.
  *
  * Variables recibidas:
  *   $curso  object  el curso que se está editando
- *   $arbol  array   módulos anidados:
- *                   [ [ 'modulo'=>obj, 'subtemas'=>[ [ 'subtema'=>obj, 'contenidos'=>[obj,...] ], ... ] ], ... ]
+ *   $arbol  array   módulos: [ [ 'modulo'=>obj, 'contenidos'=>[obj,...], 'preguntas'=>[obj,...] ], ... ]
  *   $list_url  string  URL de la lista de cursos
  *   $msg       string  mensaje de estado
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -39,6 +39,17 @@ $tipos_ico = array(
 $editar_curso_url = add_query_arg( array( 'accion' => 'editar', 'id' => (int) $curso->id ), $list_url );
 $nuevo_modulo_url = add_query_arg( array( 'accion' => 'modulo_form', 'curso' => (int) $curso->id ), $list_url );
 $orden_modulo     = count( $arbol ) + 1; // sugerencia de orden para un módulo nuevo.
+
+// Link de invitación al curso (se comparte con los estudiantes).
+$invite_token = LMS_Course::ensure_token( (int) $curso->id );
+$invite_url   = add_query_arg( 'invite', $invite_token, get_permalink( get_the_ID() ) );
+$invite_regen = wp_nonce_url(
+	add_query_arg(
+		array( 'lms_action' => 'regen_invite', 'id' => (int) $curso->id, 'redirect' => rawurlencode( $estructura_url ) ),
+		$estructura_url
+	),
+	'lms_regen_invite_' . (int) $curso->id
+);
 
 /** Ayudante: enlace de borrado con nonce que vuelve a esta página. */
 $borrar_url = function ( $accion, $id, $nonce ) use ( $estructura_url ) {
@@ -63,9 +74,26 @@ $borrar_url = function ( $accion, $id, $nonce ) use ( $estructura_url ) {
 			<p class="lms-coursecard__desc"><?php echo esc_html( wp_trim_words( wp_strip_all_tags( (string) $curso->description ), 30, '…' ) ); ?></p>
 		<?php endif; ?>
 	</div>
-	<a class="lms-btn-outline lms-btn-outline--sm" href="<?php echo esc_url( $editar_curso_url ); ?>">
+	<a class="lms-btn-outline lms-btn-outline--sm" href="<?php echo esc_url( $editar_curso_url ); ?>"
+	   data-modal-trigger data-modal="curso" data-mode="edit"
+	   data-id="<?php echo (int) $curso->id; ?>"
+	   data-title="<?php echo esc_attr( $curso->title ); ?>"
+	   data-desc="<?php echo esc_attr( $curso->description ); ?>"
+	   data-published="<?php echo (int) $curso->published; ?>">
 		<i class="bi bi-sliders"></i> Editar datos
 	</a>
+</div>
+
+<!-- Link de invitación al curso -->
+<div class="lms-invite">
+	<div class="lms-invite__info">
+		<span class="lms-invite__label"><i class="bi bi-link-45deg"></i> Link de invitación al curso</span>
+		<input type="text" class="lms-invite__url" value="<?php echo esc_url( $invite_url ); ?>" readonly onclick="this.select();">
+	</div>
+	<div class="lms-invite__actions">
+		<button type="button" class="lms-course__btn lms-invite__copy" data-copy="<?php echo esc_attr( $invite_url ); ?>"><i class="bi bi-clipboard"></i> Copiar link</button>
+		<a class="lms-iconbtn" href="<?php echo esc_url( $invite_regen ); ?>" title="Regenerar (invalida el link anterior)" onclick="return confirm('¿Regenerar el link? El anterior dejará de funcionar.');"><i class="bi bi-arrow-clockwise"></i></a>
+	</div>
 </div>
 
 <?php if ( 'saved' === $msg ) : ?>
@@ -76,6 +104,8 @@ $borrar_url = function ( $accion, $id, $nonce ) use ( $estructura_url ) {
 	<div class="lms-notice lms-notice--err"><i class="bi bi-exclamation-triangle"></i> Revisa los datos e inténtalo de nuevo.</div>
 <?php elseif ( 'expired' === $msg ) : ?>
 	<div class="lms-notice lms-notice--err"><i class="bi bi-clock-history"></i> El enlace expiró. Vuelve a intentarlo.</div>
+<?php elseif ( 'invite' === $msg ) : ?>
+	<div class="lms-notice lms-notice--ok"><i class="bi bi-link-45deg"></i> Link de invitación regenerado. El anterior ya no funciona.</div>
 <?php endif; ?>
 
 <!-- Barra de sección -->
@@ -102,13 +132,13 @@ $borrar_url = function ( $accion, $id, $nonce ) use ( $estructura_url ) {
 	<div class="lms-tree">
 		<?php foreach ( $arbol as $nodo_m ) : ?>
 			<?php
-			$m           = $nodo_m['modulo'];
-			$subtemas    = $nodo_m['subtemas'];
-			$preguntas   = $nodo_m['preguntas'];
-			$n_sub       = count( $subtemas );
-			$n_preg      = count( $preguntas );
+			$m            = $nodo_m['modulo'];
+			$contenidos   = $nodo_m['contenidos'];
+			$preguntas    = $nodo_m['preguntas'];
+			$n_con        = count( $contenidos );
+			$n_preg       = count( $preguntas );
 			$editar_m_url = add_query_arg( array( 'accion' => 'modulo_form', 'curso' => (int) $curso->id, 'id' => (int) $m->id ), $list_url );
-			$nuevo_s_url  = add_query_arg( array( 'accion' => 'subtema_form', 'modulo' => (int) $m->id ), $list_url );
+			$nuevo_c_url  = add_query_arg( array( 'accion' => 'contenido_form', 'modulo' => (int) $m->id ), $list_url );
 			?>
 			<!-- NIVEL 1: MÓDULO -->
 			<div class="lms-tnode lms-tnode--mod is-open">
@@ -120,7 +150,7 @@ $borrar_url = function ( $accion, $id, $nonce ) use ( $estructura_url ) {
 					<span class="lms-tbadge"><?php echo (int) $m->order_index; ?></span>
 					<div class="lms-tnode__titles">
 						<span class="lms-tnode__title"><?php echo esc_html( $m->title ); ?></span>
-						<span class="lms-tnode__sub"><?php echo (int) $n_sub; ?> subtema<?php echo 1 === $n_sub ? '' : 's'; ?></span>
+						<span class="lms-tnode__sub"><?php echo (int) $n_con; ?> contenido<?php echo 1 === $n_con ? '' : 's'; ?></span>
 					</div>
 					<div class="lms-tnode__actions">
 						<a class="lms-iconbtn" href="<?php echo esc_url( $editar_m_url ); ?>" title="Editar módulo"
@@ -133,85 +163,44 @@ $borrar_url = function ( $accion, $id, $nonce ) use ( $estructura_url ) {
 				</div>
 
 				<div class="lms-tnode__body">
-					<?php if ( empty( $subtemas ) ) : ?>
-						<p class="lms-tempty">Este módulo aún no tiene subtemas.</p>
+					<?php if ( empty( $contenidos ) ) : ?>
+						<p class="lms-tempty">Este módulo aún no tiene contenidos.</p>
 					<?php else : ?>
-						<?php foreach ( $subtemas as $nodo_s ) : ?>
+						<?php foreach ( $contenidos as $c ) : ?>
 							<?php
-							$s            = $nodo_s['subtema'];
-							$contenidos   = $nodo_s['contenidos'];
-							$n_con        = count( $contenidos );
-							$editar_s_url = add_query_arg( array( 'accion' => 'subtema_form', 'modulo' => (int) $m->id, 'id' => (int) $s->id ), $list_url );
-							$nuevo_c_url  = add_query_arg( array( 'accion' => 'contenido_form', 'subtema' => (int) $s->id ), $list_url );
+							$tipo_lbl     = isset( $tipos_lbl[ $c->type ] ) ? $tipos_lbl[ $c->type ] : $c->type;
+							$tipo_ico     = isset( $tipos_ico[ $c->type ] ) ? $tipos_ico[ $c->type ] : 'bi-dot';
+							$editar_c_url = add_query_arg( array( 'accion' => 'contenido_form', 'modulo' => (int) $m->id, 'id' => (int) $c->id ), $list_url );
 							?>
-							<!-- NIVEL 2: SUBTEMA -->
-							<div class="lms-tnode lms-tnode--sub is-open">
-								<div class="lms-tnode__head">
-									<button type="button" class="lms-tnode__chevron" data-toggle-node aria-label="Expandir o contraer">
-										<i class="bi bi-chevron-down"></i>
-									</button>
-									<span class="lms-grip" title="Pronto: arrastrar para reordenar"><i class="bi bi-grip-vertical"></i></span>
-									<div class="lms-tnode__titles">
-										<span class="lms-tnode__title"><?php echo esc_html( $s->title ); ?></span>
-										<span class="lms-tnode__sub"><?php echo (int) $n_con; ?> contenido<?php echo 1 === $n_con ? '' : 's'; ?></span>
-									</div>
-									<div class="lms-tnode__actions">
-										<a class="lms-iconbtn" href="<?php echo esc_url( $editar_s_url ); ?>" title="Editar subtema"
-										   data-modal-trigger data-modal="subtema" data-mode="edit"
-										   data-module="<?php echo (int) $m->id; ?>"
-										   data-id="<?php echo (int) $s->id; ?>"
-										   data-title="<?php echo esc_attr( $s->title ); ?>"
-										   data-desc="<?php echo esc_attr( $s->description ); ?>"
-										   data-order="<?php echo (int) $s->order_index; ?>"><i class="bi bi-pencil"></i></a>
-										<a class="lms-iconbtn lms-iconbtn--danger" href="<?php echo esc_url( $borrar_url( 'delete_subtopic', $s->id, 'lms_delete_subtopic_' ) ); ?>" title="Borrar subtema" onclick="return confirm('¿Borrar este subtema y sus contenidos?');"><i class="bi bi-trash"></i></a>
-									</div>
-								</div>
-
-								<div class="lms-tnode__body">
-									<?php foreach ( $contenidos as $c ) : ?>
-										<?php
-										$tipo_lbl     = isset( $tipos_lbl[ $c->type ] ) ? $tipos_lbl[ $c->type ] : $c->type;
-										$tipo_ico     = isset( $tipos_ico[ $c->type ] ) ? $tipos_ico[ $c->type ] : 'bi-dot';
-										$editar_c_url = add_query_arg( array( 'accion' => 'contenido_form', 'subtema' => (int) $s->id, 'id' => (int) $c->id ), $list_url );
-										?>
-										<!-- NIVEL 3: CONTENIDO -->
-										<div class="lms-tleaf lms-tleaf--<?php echo esc_attr( $c->type ); ?>">
-											<span class="lms-grip" title="Pronto: arrastrar para reordenar"><i class="bi bi-grip-vertical"></i></span>
-											<span class="lms-tleaf__icon"><i class="bi <?php echo esc_attr( $tipo_ico ); ?>"></i></span>
-											<span class="lms-tleaf__title"><?php echo esc_html( $c->title ); ?></span>
-											<span class="lms-tleaf__type"><?php echo esc_html( $tipo_lbl ); ?></span>
-											<span class="lms-tleaf__actions">
-												<a class="lms-iconbtn" href="<?php echo esc_url( $editar_c_url ); ?>" title="Editar contenido"
-												   data-modal-trigger data-modal="contenido" data-mode="edit"
-												   data-subtema="<?php echo (int) $s->id; ?>"
-												   data-id="<?php echo (int) $c->id; ?>"
-												   data-ctype="<?php echo esc_attr( $c->type ); ?>"
-												   data-title="<?php echo esc_attr( $c->title ); ?>"
-												   data-text="<?php echo esc_attr( $c->content_text ); ?>"
-												   data-url="<?php echo esc_attr( $c->content_url ); ?>"
-												   data-order="<?php echo (int) $c->order_index; ?>"><i class="bi bi-pencil"></i></a>
-												<a class="lms-iconbtn lms-iconbtn--danger" href="<?php echo esc_url( $borrar_url( 'delete_content', $c->id, 'lms_delete_content_' ) ); ?>" title="Borrar contenido" onclick="return confirm('¿Borrar este contenido?');"><i class="bi bi-trash"></i></a>
-											</span>
-										</div>
-									<?php endforeach; ?>
-
-									<a class="lms-tadd" href="<?php echo esc_url( $nuevo_c_url ); ?>"
-									   data-modal-trigger data-modal="contenido" data-mode="new"
-									   data-subtema="<?php echo (int) $s->id; ?>" data-order="<?php echo (int) ( $n_con + 1 ); ?>">
-										<i class="bi bi-plus-lg"></i> Añadir contenido
-									</a>
-								</div>
+							<!-- NIVEL 2: CONTENIDO -->
+							<div class="lms-tleaf lms-tleaf--<?php echo esc_attr( $c->type ); ?>">
+								<span class="lms-grip" title="Pronto: arrastrar para reordenar"><i class="bi bi-grip-vertical"></i></span>
+								<span class="lms-tleaf__icon"><i class="bi <?php echo esc_attr( $tipo_ico ); ?>"></i></span>
+								<span class="lms-tleaf__title"><?php echo esc_html( $c->title ); ?></span>
+								<span class="lms-tleaf__type"><?php echo esc_html( $tipo_lbl ); ?></span>
+								<span class="lms-tleaf__actions">
+									<a class="lms-iconbtn" href="<?php echo esc_url( $editar_c_url ); ?>" title="Editar contenido"
+									   data-modal-trigger data-modal="contenido" data-mode="edit"
+									   data-module="<?php echo (int) $m->id; ?>"
+									   data-id="<?php echo (int) $c->id; ?>"
+									   data-ctype="<?php echo esc_attr( $c->type ); ?>"
+									   data-title="<?php echo esc_attr( $c->title ); ?>"
+									   data-text="<?php echo esc_attr( $c->content_text ); ?>"
+									   data-url="<?php echo esc_attr( $c->content_url ); ?>"
+									   data-order="<?php echo (int) $c->order_index; ?>"><i class="bi bi-pencil"></i></a>
+									<a class="lms-iconbtn lms-iconbtn--danger" href="<?php echo esc_url( $borrar_url( 'delete_content', $c->id, 'lms_delete_content_' ) ); ?>" title="Borrar contenido" onclick="return confirm('¿Borrar este contenido?');"><i class="bi bi-trash"></i></a>
+								</span>
 							</div>
 						<?php endforeach; ?>
 					<?php endif; ?>
 
-					<a class="lms-tadd lms-tadd--sub" href="<?php echo esc_url( $nuevo_s_url ); ?>"
-					   data-modal-trigger data-modal="subtema" data-mode="new"
-					   data-module="<?php echo (int) $m->id; ?>" data-order="<?php echo (int) ( $n_sub + 1 ); ?>">
-						<i class="bi bi-plus-lg"></i> Añadir subtema
+					<a class="lms-tadd" href="<?php echo esc_url( $nuevo_c_url ); ?>"
+					   data-modal-trigger data-modal="contenido" data-mode="new"
+					   data-module="<?php echo (int) $m->id; ?>" data-order="<?php echo (int) ( $n_con + 1 ); ?>">
+						<i class="bi bi-plus-lg"></i> Añadir contenido
 					</a>
 
-					<!-- Evaluación del módulo (parte del módulo, después de los subtemas) -->
+					<!-- Evaluación del módulo (parte del módulo, después de los contenidos) -->
 					<div class="lms-eval">
 						<div class="lms-eval__head">
 							<span class="lms-eval__icon"><i class="bi bi-card-checklist"></i></span>
@@ -259,7 +248,7 @@ $borrar_url = function ( $accion, $id, $nonce ) use ( $estructura_url ) {
 
 <p class="lms-treefoot">
 	<i class="bi bi-info-circle"></i>
-	El orden de módulos, subtemas y contenidos se define con el campo <strong>Orden</strong> de cada formulario.
+	El orden de módulos y contenidos se define con el campo <strong>Orden</strong> de cada formulario.
 	(Arrastrar para reordenar llegará más adelante.)
 </p>
 
@@ -298,52 +287,16 @@ $borrar_url = function ( $accion, $id, $nonce ) use ( $estructura_url ) {
 	</div>
 </div>
 
-<!-- Modal: SUBTEMA -->
-<div class="modal fade lms-modal" id="lms-modal-subtema" tabindex="-1" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-			<form method="post" action="<?php echo esc_url( $estructura_url ); ?>">
-				<input type="hidden" name="lms_action" value="save_subtopic">
-				<input type="hidden" name="subtopic_id" value="0" data-field="id">
-				<input type="hidden" name="module_id" value="0" data-field="module">
-				<input type="hidden" name="redirect" value="<?php echo esc_url( $estructura_url ); ?>">
-				<?php wp_nonce_field( 'lms_save_subtopic' ); ?>
-				<div class="modal-header">
-					<h5 class="modal-title" data-modal-title>Nuevo subtema</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-				</div>
-				<div class="modal-body">
-					<div class="lms-field">
-						<label>Título del subtema <span class="lms-req">*</span></label>
-						<input type="text" name="title" required placeholder="Ej. ¿Qué es una contraseña segura?">
-					</div>
-					<div class="lms-field">
-						<label>Descripción</label>
-						<textarea name="description" rows="4" placeholder="Breve descripción del subtema."></textarea>
-					</div>
-					<div class="lms-field">
-						<label>Orden</label>
-						<input type="text" name="order_index" value="1" inputmode="numeric" style="max-width:120px;">
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="lms-btn-ghost" data-bs-dismiss="modal">Cancelar</button>
-					<button type="submit" class="lms-course__btn"><i class="bi bi-save"></i> Guardar subtema</button>
-				</div>
-			</form>
-		</div>
-	</div>
-</div>
-
 <!-- Modal: CONTENIDO -->
 <div class="modal fade lms-modal" id="lms-modal-contenido" tabindex="-1" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered">
 		<div class="modal-content">
-			<form method="post" action="<?php echo esc_url( $estructura_url ); ?>">
+			<form method="post" action="<?php echo esc_url( $estructura_url ); ?>" enctype="multipart/form-data">
 				<input type="hidden" name="lms_action" value="save_content">
 				<input type="hidden" name="content_id" value="0" data-field="id">
-				<input type="hidden" name="subtopic_id" value="0" data-field="subtema">
+				<input type="hidden" name="module_id" value="0" data-field="module">
 				<input type="hidden" name="redirect" value="<?php echo esc_url( $estructura_url ); ?>">
+				<input type="hidden" name="current_url" value="" data-field="current_url">
 				<?php wp_nonce_field( 'lms_save_content' ); ?>
 				<div class="modal-header">
 					<h5 class="modal-title" data-modal-title>Nuevo contenido</h5>
@@ -364,12 +317,19 @@ $borrar_url = function ( $accion, $id, $nonce ) use ( $estructura_url ) {
 					</div>
 					<div class="lms-field" data-when="texto">
 						<label>Contenido de texto</label>
-						<textarea name="content_text" rows="6" placeholder="Escribe aquí la información del contenido."></textarea>
+						<div class="lms-editor" data-quill-editor></div>
+						<textarea name="content_text" data-quill-input hidden></textarea>
 					</div>
-					<div class="lms-field" data-when="video pdf recurso">
+					<div class="lms-field" data-when="video recurso">
 						<label>Enlace (URL)</label>
 						<input type="url" name="content_url" placeholder="https://...">
-						<p class="lms-help">Pega el enlace del video (YouTube/Vimeo), del PDF o del recurso externo.</p>
+						<p class="lms-help">Pega el enlace del video (YouTube/Vimeo) o de un recurso externo.</p>
+					</div>
+					<div class="lms-field" data-when="pdf recurso">
+						<label>Subir archivo</label>
+						<p class="lms-help" data-current-file style="display:none;">Archivo actual: <a data-current-link href="#" target="_blank" rel="noopener">ver</a> — sube uno nuevo solo si quieres reemplazarlo.</p>
+						<input type="file" name="content_file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,image/*">
+						<p class="lms-help">Sube un PDF o cualquier documento (Word, Excel, PowerPoint, imagen, etc.).</p>
 					</div>
 					<div class="lms-field">
 						<label>Orden</label>
@@ -379,6 +339,44 @@ $borrar_url = function ( $accion, $id, $nonce ) use ( $estructura_url ) {
 				<div class="modal-footer">
 					<button type="button" class="lms-btn-ghost" data-bs-dismiss="modal">Cancelar</button>
 					<button type="submit" class="lms-course__btn"><i class="bi bi-save"></i> Guardar contenido</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- Modal: CURSO (editar datos del curso, sin salir de esta página) -->
+<div class="modal fade lms-modal" id="lms-modal-curso" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<form method="post" action="<?php echo esc_url( $list_url ); ?>">
+				<input type="hidden" name="lms_action" value="save_course">
+				<input type="hidden" name="course_id" value="0" data-field="id">
+				<input type="hidden" name="redirect" value="<?php echo esc_url( $estructura_url ); ?>">
+				<?php wp_nonce_field( 'lms_save_course' ); ?>
+				<div class="modal-header">
+					<h5 class="modal-title" data-modal-title>Editar curso</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+				</div>
+				<div class="modal-body">
+					<div class="lms-field">
+						<label>Título del curso <span class="lms-req">*</span></label>
+						<input type="text" name="title" required placeholder="Ej. Seguridad en Redes">
+					</div>
+					<div class="lms-field">
+						<label>Descripción</label>
+						<textarea name="description" rows="5" placeholder="¿De qué trata el curso?"></textarea>
+					</div>
+					<div class="lms-field lms-field--check">
+						<label>
+							<input type="checkbox" name="published" value="1">
+							Publicar curso (si lo dejas sin marcar, queda como borrador)
+						</label>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="lms-btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+					<button type="submit" class="lms-course__btn"><i class="bi bi-save"></i> Guardar curso</button>
 				</div>
 			</form>
 		</div>
@@ -436,12 +434,59 @@ $borrar_url = function ( $accion, $id, $nonce ) use ( $estructura_url ) {
 		} );
 	} );
 
+	// 1b) Copiar el link de invitación al portapapeles.
+	var copyBtn = document.querySelector( '[data-copy]' );
+	if ( copyBtn ) {
+		copyBtn.addEventListener( 'click', function () {
+			var url = copyBtn.getAttribute( 'data-copy' );
+			var inp = document.querySelector( '.lms-invite__url' );
+			function feedback() {
+				var orig = copyBtn.innerHTML;
+				copyBtn.innerHTML = '<i class="bi bi-check-lg"></i> ¡Copiado!';
+				setTimeout( function () { copyBtn.innerHTML = orig; }, 1800 );
+			}
+			function fallback() { if ( inp ) { inp.focus(); inp.select(); try { document.execCommand( 'copy' ); } catch ( e ) {} feedback(); } }
+			if ( navigator.clipboard && navigator.clipboard.writeText ) {
+				navigator.clipboard.writeText( url ).then( feedback, fallback );
+			} else {
+				fallback();
+			}
+		} );
+	}
+
+	// 1c) Editor enriquecido (Quill) para el contenido tipo texto.
+	var contModal = document.getElementById( 'lms-modal-contenido' );
+	var quillEd   = null;
+	if ( contModal && window.Quill ) {
+		var qEl = contModal.querySelector( '[data-quill-editor]' );
+		if ( qEl ) {
+			quillEd = new Quill( qEl, {
+				theme: 'snow',
+				placeholder: 'Escribe aquí la información del contenido.',
+				modules: { toolbar: [
+					[ { header: [ 2, 3, false ] } ],
+					[ 'bold', 'italic', 'underline' ],
+					[ { list: 'ordered' }, { list: 'bullet' } ],
+					[ 'link' ],
+					[ 'clean' ]
+				] }
+			} );
+			var qForm  = contModal.querySelector( 'form' );
+			var qInput = contModal.querySelector( '[data-quill-input]' );
+			if ( qForm && qInput ) {
+				qForm.addEventListener( 'submit', function () {
+					qInput.value = ( quillEd.getText().trim() === '' ) ? '' : quillEd.root.innerHTML;
+				} );
+			}
+		}
+	}
+
 	// 2) Abrir modales (rellenando el formulario según el botón pulsado).
 	var titulos = {
 		modulo:    [ 'Nuevo módulo', 'Editar módulo' ],
-		subtema:   [ 'Nuevo subtema', 'Editar subtema' ],
 		contenido: [ 'Nuevo contenido', 'Editar contenido' ],
-		pregunta:  [ 'Nueva pregunta', 'Editar pregunta' ]
+		pregunta:  [ 'Nueva pregunta', 'Editar pregunta' ],
+		curso:     [ 'Editar curso', 'Editar curso' ]
 	};
 
 	function campo( modal, name ) { return modal.querySelector( '[name="' + name + '"]' ); }
@@ -498,7 +543,7 @@ $borrar_url = function ( $accion, $id, $nonce ) use ( $estructura_url ) {
 			if ( ! window.bootstrap ) { return; } // sin JS de Bootstrap: deja navegar (respaldo).
 			e.preventDefault();
 			var d     = t.dataset;
-			var tipo  = d.modal;          // modulo | subtema | contenido
+			var tipo  = d.modal;          // modulo | contenido | pregunta | curso
 			var esEdit = ( d.mode === 'edit' );
 			var modal = document.getElementById( 'lms-modal-' + tipo );
 			if ( ! modal ) { return; }
@@ -506,22 +551,35 @@ $borrar_url = function ( $accion, $id, $nonce ) use ( $estructura_url ) {
 			// Título del modal.
 			modal.querySelector( '[data-modal-title]' ).textContent = titulos[ tipo ][ esEdit ? 1 : 0 ];
 
-			// Id (0 = nuevo) y contexto padre.
+			// Id (0 = nuevo) y contexto padre (el módulo).
 			var fId = campoData( modal, 'id' ); if ( fId ) { fId.value = d.id || '0'; }
-			if ( tipo === 'subtema' || tipo === 'pregunta' ) { var fM = campoData( modal, 'module' );  if ( fM ) { fM.value = d.module || '0'; } }
-			if ( tipo === 'contenido' ) { var fS = campoData( modal, 'subtema' ); if ( fS ) { fS.value = d.subtema || '0'; } }
+			if ( tipo === 'contenido' || tipo === 'pregunta' ) {
+				var fM = campoData( modal, 'module' ); if ( fM ) { fM.value = d.module || '0'; }
+			}
 
 			// Campos del formulario.
 			var fTitle = campo( modal, 'title' );       if ( fTitle ) { fTitle.value = d.title || ''; }
 			var fOrder = campo( modal, 'order_index' );  if ( fOrder ) { fOrder.value = d.order || '1'; }
-			if ( tipo === 'subtema' ) {
-				var fDesc = campo( modal, 'description' ); if ( fDesc ) { fDesc.value = d.desc || ''; }
-			}
+
 			if ( tipo === 'contenido' ) {
 				var fType = campo( modal, 'type' );        if ( fType ) { fType.value = d.ctype || 'texto'; }
 				var fText = campo( modal, 'content_text' ); if ( fText ) { fText.value = d.text || ''; }
+				if ( quillEd ) { quillEd.clipboard.dangerouslyPasteHTML( d.text || '' ); }
 				var fUrl  = campo( modal, 'content_url' );  if ( fUrl )  { fUrl.value  = d.url || ''; }
+				var fCur  = campo( modal, 'current_url' );  if ( fCur )  { fCur.value  = d.url || ''; }
+				var fFile = campo( modal, 'content_file' ); if ( fFile ) { fFile.value = ''; } // limpiar el input de archivo.
+				// Mostrar el archivo/enlace actual (si lo hay) al editar.
+				var note  = modal.querySelector( '[data-current-file]' );
+				var link  = modal.querySelector( '[data-current-link]' );
+				if ( note && link ) {
+					if ( d.url ) { link.href = d.url; note.style.display = ''; }
+					else { note.style.display = 'none'; }
+				}
 				toggleContenido( modal );
+			}
+			if ( tipo === 'curso' ) {
+				var fCDesc = campo( modal, 'description' ); if ( fCDesc ) { fCDesc.value = d.desc || ''; }
+				var fCPub  = campo( modal, 'published' );   if ( fCPub )  { fCPub.checked = ( d.published === '1' ); }
 			}
 			if ( tipo === 'pregunta' ) {
 				var fQ = campo( modal, 'question_text' ); if ( fQ ) { fQ.value = d.text || ''; }

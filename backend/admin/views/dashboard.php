@@ -30,7 +30,7 @@ $db_ok = ( 17 === $tablas_existentes );
 	<div class="lms-hero">
 		<div class="lms-hero__icon"><span class="dashicons dashicons-welcome-learn-more"></span></div>
 		<div>
-			<h1 class="lms-hero__title">Capacitaciones Teems</h1>
+			<h1 class="lms-hero__title">Capacitaciones Teamms</h1>
 			<p class="lms-hero__subtitle">Plataforma de capacitación empresarial · Panel de administración</p>
 		</div>
 		<span class="lms-badge-version">v<?php echo esc_html( TEEMS_LMS_VERSION ); ?></span>
@@ -65,7 +65,7 @@ $db_ok = ( 17 === $tablas_existentes );
 			<li class="lms-steps__done">Semana 1 — Estructura base y 17 tablas de la base de datos</li>
 			<li class="lms-steps__current">Semana 2 — Roles del sistema, invitaciones y activación de cuenta</li>
 			<li>Semana 3 — Gestión de empresas y usuarios</li>
-			<li>Semana 4 — Cursos, módulos y subtemas</li>
+			<li>Semana 4 — Cursos, módulos y contenidos</li>
 			<li>Semana 5 en adelante — Contenidos, evaluaciones, certificados…</li>
 		</ul>
 		<p class="lms-note">Esta es una vista de bienvenida temporal. Las secciones reales (Empresas, Usuarios, Cursos…) se irán agregando semana a semana.</p>

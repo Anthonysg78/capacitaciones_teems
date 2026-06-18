@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name:       Capacitaciones Teems
+ * Plugin Name:       Capacitaciones Teamms
  * Plugin URI:        https://teems.local
  * Description:       Plataforma de capacitación empresarial privada (LMS) para WordPress. Empresas, cursos, evaluaciones, certificados con QR e insignias. Acceso solo por invitación.
- * Version:           0.11.1
+ * Version:           0.14.0
  * Requires at least: 6.0
  * Requires PHP:      8.0
  * Author:            Accons
@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * - URL:     dirección web pública (para cargar CSS, JS, imágenes).
  * - BASENAME: identificador del plugin que usa WordPress internamente.
  */
-define( 'TEEMS_LMS_VERSION', '0.11.1' );
+define( 'TEEMS_LMS_VERSION', '0.14.0' );
 define( 'TEEMS_LMS_PATH', plugin_dir_path( __FILE__ ) );   // termina en \
 define( 'TEEMS_LMS_URL', plugin_dir_url( __FILE__ ) );     // termina en /
 define( 'TEEMS_LMS_BASENAME', plugin_basename( __FILE__ ) );
@@ -46,6 +46,7 @@ define( 'TEEMS_LMS_BASENAME', plugin_basename( __FILE__ ) );
  * Traemos los archivos que contienen la lógica de activar y desactivar.
  * Aún no ejecutamos nada: solo dejamos las clases disponibles.
  */
+require_once TEEMS_LMS_PATH . 'backend/core/class-lms-roles.php';
 require_once TEEMS_LMS_PATH . 'backend/core/class-lms-activator.php';
 require_once TEEMS_LMS_PATH . 'backend/core/class-lms-deactivator.php';
 
@@ -71,26 +72,37 @@ register_deactivation_hook( __FILE__, array( 'LMS_Deactivator', 'deactivate' ) )
  * Por ahora solo dejamos la función lista; iremos llenándola semana a semana.
  */
 function teems_lms_run() {
+	// Roles propios + control de acceso (bloquea wp-admin a usuarios externos).
+	new LMS_Roles();
+
+	// Autenticación propia del LMS (login/logout en el frontend).
+	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-auth-actions.php';
+	new LMS_Auth_Actions();
+	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-enroll-actions.php';
+	new LMS_Enroll_Actions();
+
 	// Modelos (acceso a datos) — disponibles tanto en frontend como en backend.
+	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-company.php';
 	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-course.php';
+	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-enrollment.php';
 	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-module.php';
-	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-subtopic.php';
 	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-content.php';
 	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-progress.php';
 	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-question.php';
 	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-evaluation.php';
+	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-certificate.php';
 
-	// Acciones de formularios: guardar/borrar cursos, módulos, subtemas, contenidos, progreso, preguntas y evaluación.
+	// Acciones de formularios: guardar/borrar empresas, cursos, módulos, subtemas, contenidos, progreso, preguntas y evaluación.
+	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-company-actions.php';
 	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-course-actions.php';
 	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-module-actions.php';
-	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-subtopic-actions.php';
 	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-content-actions.php';
 	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-progress-actions.php';
 	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-question-actions.php';
 	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-evaluation-actions.php';
+	new LMS_Company_Actions();
 	new LMS_Course_Actions();
 	new LMS_Module_Actions();
-	new LMS_Subtopic_Actions();
 	new LMS_Content_Actions();
 	new LMS_Progress_Actions();
 	new LMS_Question_Actions();

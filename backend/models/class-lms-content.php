@@ -1,16 +1,16 @@
 <?php
 /**
- * Modelo: Contenido de un subtema.
+ * Modelo: Contenido de un módulo.
  *
- * Acceso a la tabla wp_lms_contents. Un contenido pertenece a un subtema
- * (subtopic_id) y tiene un tipo: texto, video, pdf o recurso.
+ * Acceso a la tabla wp_lms_contents. Un contenido pertenece a un MÓDULO
+ * (module_id) y tiene un tipo: texto, video, pdf o recurso.
  *
  *   - texto   → se guarda en content_text (el cuerpo de la información).
  *   - video   → content_url (enlace de YouTube/Vimeo).
- *   - pdf     → content_url (enlace al PDF de apoyo).
- *   - recurso → content_url (enlace a un recurso externo).
+ *   - pdf     → content_url (archivo subido a la Biblioteca de Medios o enlace).
+ *   - recurso → content_url (archivo subido o enlace externo).
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -38,13 +38,13 @@ class LMS_Content {
 	}
 
 	/**
-	 * Todos los contenidos de un subtema, ordenados.
+	 * Todos los contenidos de un módulo, ordenados.
 	 */
-	public static function all_by_subtopic( $subtopic_id ) {
+	public static function all_by_module( $module_id ) {
 		global $wpdb;
 		$tabla = self::table();
 		return $wpdb->get_results(
-			$wpdb->prepare( "SELECT * FROM {$tabla} WHERE subtopic_id = %d ORDER BY order_index ASC, id ASC", absint( $subtopic_id ) )
+			$wpdb->prepare( "SELECT * FROM {$tabla} WHERE module_id = %d ORDER BY order_index ASC, id ASC", absint( $module_id ) )
 		);
 	}
 
@@ -57,27 +57,44 @@ class LMS_Content {
 	}
 
 	/**
-	 * Siguiente orden disponible para un subtema (max + 1).
+	 * Siguiente orden disponible para un módulo (max + 1).
 	 */
-	public static function next_order( $subtopic_id ) {
+	public static function next_order( $module_id ) {
 		global $wpdb;
 		$tabla = self::table();
 		$max   = (int) $wpdb->get_var(
-			$wpdb->prepare( "SELECT MAX(order_index) FROM {$tabla} WHERE subtopic_id = %d", absint( $subtopic_id ) )
+			$wpdb->prepare( "SELECT MAX(order_index) FROM {$tabla} WHERE module_id = %d", absint( $module_id ) )
 		);
 		return $max + 1;
 	}
 
 	/**
+	 * Cuántos contenidos tiene un curso (sumando todos sus módulos).
+	 */
+	public static function count_by_course( $course_id ) {
+		global $wpdb;
+		$p = $wpdb->prefix . 'lms_';
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*)
+				 FROM {$p}contents c
+				 INNER JOIN {$p}modules m ON c.module_id = m.id
+				 WHERE m.course_id = %d",
+				absint( $course_id )
+			)
+		);
+	}
+
+	/**
 	 * Crea un contenido.
-	 * $data = [ subtopic_id, type, title, content_text, content_url, order_index ].
+	 * $data = [ module_id, type, title, content_text, content_url, order_index ].
 	 */
 	public static function create( $data ) {
 		global $wpdb;
 		$ok = $wpdb->insert(
 			self::table(),
 			array(
-				'subtopic_id'  => absint( $data['subtopic_id'] ),
+				'module_id'    => absint( $data['module_id'] ),
 				'type'         => $data['type'],
 				'title'        => $data['title'],
 				'content_text' => $data['content_text'],

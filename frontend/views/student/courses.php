@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <?php if ( empty( $cursos ) ) : ?>
 	<div class="lms-empty">
 		<i class="bi bi-collection-play"></i>
-		<p>Todavía no hay cursos disponibles. Cuando el administrador publique un curso, aparecerá aquí.</p>
+		<p>Todavía no te has unido a ningún curso. Abre el <strong>link de invitación</strong> que te compartió tu empresa o el administrador para inscribirte.</p>
 	</div>
 <?php else : ?>
 	<div class="lms-courses">

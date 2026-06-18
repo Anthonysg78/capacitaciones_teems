@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="lms-side__brand">
 		<span class="lms-side__logo"><i class="bi bi-mortarboard-fill"></i></span>
 		<span class="lms-side__brandtext">
-			<strong>Teems</strong>
+			<strong>Teamms</strong>
 			<small><?php echo esc_html( $perfil_label ); ?></small>
 		</span>
 	</div>

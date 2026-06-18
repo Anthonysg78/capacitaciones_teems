@@ -60,6 +60,12 @@ class LMS_Public {
 		wp_enqueue_style( 'teems-bootstrap-icons', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css', array(), '1.11.3' );
 		wp_enqueue_style( 'teems-lms-public', TEEMS_LMS_URL . 'diseno/css/lms-public.css', array( 'teems-bootstrap' ), TEEMS_LMS_VERSION );
 		wp_enqueue_script( 'teems-bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js', array(), '5.3.3', true );
+
+		// Editor de texto enriquecido (Quill) para el contenido tipo "texto".
+		// El JS se carga en el HEAD (in_footer = false) para que ya esté disponible
+		// cuando corre el script en línea del modal/formulario.
+		wp_enqueue_style( 'lms-quill', 'https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css', array(), '1.3.7' );
+		wp_enqueue_script( 'lms-quill', 'https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js', array(), '1.3.7', false );
 	}
 
 	public function load_app_template( $template ) {
@@ -82,6 +88,7 @@ class LMS_Public {
 			'teems-bootstrap',
 			'teems-bootstrap-icons',
 			'teems-lms-public',
+			'lms-quill',
 			'admin-bar',
 			'dashicons',
 		);
@@ -105,6 +112,7 @@ class LMS_Public {
 			'teems-bootstrap',
 			'teems-bootstrap-icons',
 			'teems-lms-public',
+			'lms-quill',
 			'admin-bar',
 			'dashicons',
 		);
@@ -122,6 +130,7 @@ class LMS_Public {
 		}
 		$conservar = array(
 			'teems-bootstrap',
+			'lms-quill',
 			'jquery',
 			'jquery-core',
 			'jquery-migrate',
@@ -153,13 +162,7 @@ class LMS_Public {
 	 * ==================================================================== */
 
 	private function get_perfil() {
-		// DEMO (temporal): el selector pasa ?perfil=. Se quitará en la Semana 2.
-		if ( isset( $_GET['perfil'] ) ) {
-			$p = sanitize_key( wp_unslash( $_GET['perfil'] ) );
-			if ( in_array( $p, array( 'admin', 'empresa', 'estudiante' ), true ) ) {
-				return $p;
-			}
-		}
+		// El rol se deduce de la cuenta con sesión iniciada (ya no hay selector demo).
 		if ( current_user_can( 'manage_options' ) || current_user_can( 'lms_manage' ) ) {
 			return 'admin';
 		}
@@ -207,11 +210,55 @@ class LMS_Public {
 	public function render( $atts ) {
 		$vista = isset( $_GET['vista'] ) ? sanitize_key( wp_unslash( $_GET['vista'] ) ) : 'dashboard';
 
-		// Pantalla de selección de rol (login demo). Sin sidebar.
-		if ( 'login' === $vista ) {
+		// Verificación PÚBLICA de un certificado (sin login, sin sidebar).
+		if ( 'verificar' === $vista ) {
+			$codigo = isset( $_GET['codigo'] ) ? sanitize_text_field( wp_unslash( $_GET['codigo'] ) ) : '';
 			ob_start();
-			$this->view( 'auth/login', array( 'base' => remove_query_arg( array( 'vista', 'id', 'perfil' ) ) ) );
+			$this->view( 'public/verify', array(
+				'cert'   => LMS_Certificate::details_by_code( $codigo ),
+				'codigo' => $codigo,
+			) );
 			return ob_get_clean();
+		}
+
+		// Certificado imprimible (standalone, sin sidebar).
+		if ( 'certificado' === $vista ) {
+			$codigo     = isset( $_GET['codigo'] ) ? sanitize_text_field( wp_unslash( $_GET['codigo'] ) ) : '';
+			$verify_url = add_query_arg(
+				array( 'vista' => 'verificar', 'codigo' => $codigo ),
+				remove_query_arg( array( 'vista', 'id', 'perfil', 'codigo' ) )
+			);
+			ob_start();
+			$this->view( 'student/certificate', array(
+				'cert'       => LMS_Certificate::details_by_code( $codigo ),
+				'verify_url' => $verify_url,
+				'back_url'   => $this->student_url( array( 'vista' => 'certificados' ) ),
+			) );
+			return ob_get_clean();
+		}
+
+		// A partir de aquí se requiere SESIÓN. Mostramos LOGIN o CREAR CUENTA
+		// (pantallas separadas): se elige con ?vista=registro; por defecto, login.
+		if ( ! is_user_logged_in() ) {
+			$base   = remove_query_arg( array( 'vista', 'id', 'perfil', 'err', 'lms_action', 'codigo', 'accion', 'msg', 'invite', 'invite_err' ) );
+			$invite = isset( $_GET['invite'] ) ? sanitize_text_field( wp_unslash( $_GET['invite'] ) ) : '';
+			$curso  = $invite ? LMS_Course::find_by_invite_token( $invite ) : null;
+			if ( $invite && ! $curso ) {
+				$invite = ''; // código inválido: login/registro normal.
+			}
+			$datos = array( 'base' => $base, 'invite' => $invite, 'curso' => $curso );
+			ob_start();
+			if ( 'registro' === $vista ) {
+				$this->view( 'auth/register', $datos );
+			} else {
+				$this->view( 'auth/login', $datos );
+			}
+			return ob_get_clean();
+		}
+
+		// Ya con sesión: si pidió la vista 'login', lo llevamos a su panel.
+		if ( 'login' === $vista ) {
+			$vista = 'dashboard';
 		}
 
 		$perfil = $this->get_perfil();
@@ -230,6 +277,13 @@ class LMS_Public {
 		$iniciales = strtoupper( substr( $partes[0], 0, 1 ) . ( isset( $partes[1] ) ? substr( $partes[1], 0, 1 ) : '' ) );
 		$label     = self::etiqueta_perfil( $perfil );
 
+		// URL para cerrar sesión (vuelve a la pantalla de login del LMS).
+		$pagina     = get_permalink( get_the_ID() );
+		$logout_url = add_query_arg(
+			array( 'lms_action' => 'lms_logout', 'redirect' => rawurlencode( $pagina ) ),
+			$pagina
+		);
+
 		ob_start();
 		echo '<div class="lms-app">';
 		$this->view( 'layout/sidebar', array(
@@ -245,6 +299,7 @@ class LMS_Public {
 			'nombre'       => $nombre,
 			'primer'       => $partes[0],
 			'iniciales'    => $iniciales,
+			'logout_url'   => $logout_url,
 		) );
 		echo '<main class="lms-content">';
 		$this->render_content( $perfil, $vista );
@@ -274,8 +329,13 @@ class LMS_Public {
 			return;
 		}
 
+		// Sección Empresas: lista + modal de crear/editar.
+		if ( 'empresas' === $vista ) {
+			$this->content_admin_empresas();
+			return;
+		}
+
 		$secciones = array(
-			'empresas'  => array( 'Empresas', 'bi-building', 'Aquí registrarás las empresas clientes y sus datos.' ),
 			'usuarios'  => array( 'Usuarios', 'bi-people', 'Aquí crearás usuarios y enviarás invitaciones por email.' ),
 			'preguntas' => array( 'Banco de preguntas', 'bi-patch-question', 'Aquí administrarás las preguntas de cada módulo.' ),
 			'reportes'  => array( 'Reportes', 'bi-bar-chart', 'Aquí verás métricas globales y exportarás reportes.' ),
@@ -300,6 +360,19 @@ class LMS_Public {
 	}
 
 	/**
+	 * Sección Empresas del admin: lista de empresas con modal crear/editar.
+	 */
+	private function content_admin_empresas() {
+		$msg      = isset( $_GET['msg'] ) ? sanitize_key( wp_unslash( $_GET['msg'] ) ) : '';
+		$list_url = add_query_arg( 'vista', 'empresas', get_permalink( get_the_ID() ) );
+		$this->view( 'admin/companies', array(
+			'empresas' => LMS_Company::all(),
+			'list_url' => $list_url,
+			'msg'      => $msg,
+		) );
+	}
+
+	/**
 	 * Sección Cursos del admin: lista o formulario (crear/editar).
 	 */
 	private function content_admin_cursos() {
@@ -320,28 +393,20 @@ class LMS_Public {
 				) );
 				return;
 
-			// --- Editor de ESTRUCTURA del curso (árbol módulos→subtemas→contenidos) ---
+			// --- Editor de ESTRUCTURA del curso (árbol módulos→contenidos) ---
 			case 'modulos':
 				$course_id = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : 0;
 				$curso     = LMS_Course::find( $course_id );
 				if ( ! $curso ) {
 					break; // curso inexistente: caer a la lista de cursos.
 				}
-				// Armamos el árbol anidado: cada módulo con sus subtemas, y cada
-				// subtema con sus contenidos.
+				// Armamos el árbol: cada módulo con sus contenidos y sus preguntas.
 				$arbol = array();
 				foreach ( LMS_Module::all_by_course( $course_id ) as $modulo ) {
-					$subtemas = array();
-					foreach ( LMS_Subtopic::all_by_module( (int) $modulo->id ) as $subtema ) {
-						$subtemas[] = array(
-							'subtema'    => $subtema,
-							'contenidos' => LMS_Content::all_by_subtopic( (int) $subtema->id ),
-						);
-					}
 					$arbol[] = array(
-						'modulo'    => $modulo,
-						'subtemas'  => $subtemas,
-						'preguntas' => LMS_Question::all_by_module( (int) $modulo->id ),
+						'modulo'     => $modulo,
+						'contenidos' => LMS_Content::all_by_module( (int) $modulo->id ),
+						'preguntas'  => LMS_Question::all_by_module( (int) $modulo->id ),
 					);
 				}
 				$this->view( 'admin/structure', array(
@@ -365,89 +430,30 @@ class LMS_Public {
 				) );
 				return;
 
-			// --- Lista de subtemas de un módulo ---
-			case 'subtemas':
-				$module_id = isset( $_GET['modulo'] ) ? absint( $_GET['modulo'] ) : 0;
-				$modulo    = LMS_Module::find( $module_id );
-				if ( ! $modulo ) {
-					break; // módulo inexistente: caer a la lista de cursos.
-				}
-				$curso        = LMS_Course::find( (int) $modulo->course_id );
-				$modulos_url  = add_query_arg( array( 'accion' => 'modulos', 'id' => (int) $modulo->course_id ), $list_url );
-				$subtemas_url = add_query_arg( array( 'accion' => 'subtemas', 'modulo' => $module_id ), $list_url );
-				$this->view( 'admin/subtopics', array(
-					'curso'        => $curso,
-					'modulo'       => $modulo,
-					'subtemas'     => LMS_Subtopic::all_by_module( $module_id ),
-					'list_url'     => $list_url,
-					'modulos_url'  => $modulos_url,
-					'subtemas_url' => $subtemas_url,
-					'nuevo_url'    => add_query_arg( array( 'accion' => 'subtema_form', 'modulo' => $module_id ), $list_url ),
-					'msg'          => $msg,
-				) );
-				return;
-
-			// --- Formulario de subtema (crear / editar) ---
-			case 'subtema_form':
-				$module_id    = isset( $_GET['modulo'] ) ? absint( $_GET['modulo'] ) : 0;
-				$subtema      = isset( $_GET['id'] ) ? LMS_Subtopic::find( absint( $_GET['id'] ) ) : null;
-				$modulo       = LMS_Module::find( $module_id );
-				$volver_id    = $modulo ? (int) $modulo->course_id : 0;
-				$subtemas_url = add_query_arg( array( 'accion' => 'modulos', 'id' => $volver_id ), $list_url );
-				$this->view( 'admin/subtopic-form', array(
-					'subtema'      => $subtema,
-					'module_id'    => $module_id,
-					'subtemas_url' => $subtemas_url,
-					'next_order'   => LMS_Subtopic::next_order( $module_id ),
-				) );
-				return;
-
-			// --- Lista de contenidos de un subtema ---
-			case 'contenidos':
-				$subtopic_id = isset( $_GET['subtema'] ) ? absint( $_GET['subtema'] ) : 0;
-				$subtema     = LMS_Subtopic::find( $subtopic_id );
-				if ( ! $subtema ) {
-					break; // subtema inexistente: caer a la lista de cursos.
-				}
-				$modulo         = LMS_Module::find( (int) $subtema->module_id );
-				$subtemas_url   = add_query_arg( array( 'accion' => 'subtemas', 'modulo' => (int) $subtema->module_id ), $list_url );
-				$contenidos_url = add_query_arg( array( 'accion' => 'contenidos', 'subtema' => $subtopic_id ), $list_url );
-				$this->view( 'admin/contents', array(
-					'subtema'        => $subtema,
-					'modulo'         => $modulo,
-					'contenidos'     => LMS_Content::all_by_subtopic( $subtopic_id ),
-					'subtemas_url'   => $subtemas_url,
-					'contenidos_url' => $contenidos_url,
-					'nuevo_url'      => add_query_arg( array( 'accion' => 'contenido_form', 'subtema' => $subtopic_id ), $list_url ),
-					'msg'            => $msg,
-				) );
-				return;
-
-			// --- Formulario de contenido (crear / editar) ---
+			// --- Formulario de contenido (crear / editar), página de respaldo ---
 			case 'contenido_form':
-				$subtopic_id    = isset( $_GET['subtema'] ) ? absint( $_GET['subtema'] ) : 0;
+				$module_id      = isset( $_GET['modulo'] ) ? absint( $_GET['modulo'] ) : 0;
 				$contenido      = isset( $_GET['id'] ) ? LMS_Content::find( absint( $_GET['id'] ) ) : null;
-				$subtema_obj    = LMS_Subtopic::find( $subtopic_id );
-				$modulo_obj     = $subtema_obj ? LMS_Module::find( (int) $subtema_obj->module_id ) : null;
+				$modulo_obj     = LMS_Module::find( $module_id );
 				$volver_id      = $modulo_obj ? (int) $modulo_obj->course_id : 0;
 				$contenidos_url = add_query_arg( array( 'accion' => 'modulos', 'id' => $volver_id ), $list_url );
 				$this->view( 'admin/content-form', array(
 					'contenido'      => $contenido,
-					'subtopic_id'    => $subtopic_id,
+					'module_id'      => $module_id,
 					'contenidos_url' => $contenidos_url,
-					'next_order'     => LMS_Content::next_order( $subtopic_id ),
+					'next_order'     => LMS_Content::next_order( $module_id ),
 				) );
 				return;
 		}
 
 		// Por defecto: la lista de cursos.
-		// La vista espera $items: cada curso con su conteo de módulos y subtemas.
+		// La vista espera $items: cada curso con su conteo de módulos y contenidos.
 		$items = array();
 		foreach ( LMS_Course::all() as $curso ) {
 			$items[] = array(
-				'curso'    => $curso,
-				'modulos'  => LMS_Module::count_by_course( (int) $curso->id ),
-				'subtemas' => LMS_Subtopic::count_by_course( (int) $curso->id ),
+				'curso'      => $curso,
+				'modulos'    => LMS_Module::count_by_course( (int) $curso->id ),
+				'contenidos' => LMS_Content::count_by_course( (int) $curso->id ),
 			);
 		}
 		$this->view( 'admin/courses', array(
@@ -460,7 +466,11 @@ class LMS_Public {
 
 	private function content_estudiante( $vista ) {
 		if ( 'certificados' === $vista ) {
-			$this->view( 'student/empty', array( 'titulo' => 'Mis Certificados', 'icono' => 'bi-award', 'texto' => 'Aún no tienes certificados. Completa y aprueba un módulo para obtener el tuyo.' ) );
+			$certs = LMS_Certificate::all_for_user( get_current_user_id() );
+			$this->view( 'student/certificates', array(
+				'certs' => $certs,
+				'base'  => $this->student_url( array() ),
+			) );
 			return;
 		}
 		if ( 'insignias' === $vista ) {
@@ -478,11 +488,11 @@ class LMS_Public {
 			return;
 		}
 
-		// Lista de cursos PUBLICADOS (datos reales de la BD).
+		// Solo los cursos en los que el estudiante está INSCRITO (por link).
 		$uid    = get_current_user_id();
 		$paleta = array( '#2563eb', '#059669', '#d97706', '#7c3aed', '#db2777', '#0891b2' );
 		$cursos = array();
-		foreach ( LMS_Course::all_published() as $i => $curso ) {
+		foreach ( LMS_Enrollment::courses_for_user( $uid ) as $i => $curso ) {
 			$cursos[] = array(
 				'id'       => (int) $curso->id,
 				'titulo'   => $curso->title,
@@ -501,8 +511,8 @@ class LMS_Public {
 	}
 
 	/**
-	 * VISOR de curso para el estudiante (solo lectura): módulos → subtemas →
-	 * contenidos. Reutiliza la misma estructura anidada que el editor del admin.
+	 * VISOR de curso para el estudiante (solo lectura): módulos → contenidos.
+	 * Reutiliza la misma estructura que el editor del admin.
 	 */
 	private function student_course_viewer() {
 		$course_id = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : 0;
@@ -517,19 +527,24 @@ class LMS_Public {
 			return;
 		}
 
-		$uid   = get_current_user_id();
+		$uid = get_current_user_id();
+
+		// El estudiante solo entra a cursos en los que está inscrito (por link).
+		// El administrador puede previsualizar cualquiera.
+		if ( ! LMS_Enrollment::is_enrolled( $uid, $course_id ) && ! current_user_can( 'lms_manage' ) ) {
+			$this->view( 'student/empty', array(
+				'titulo' => 'No estás inscrito',
+				'icono'  => 'bi-lock',
+				'texto'  => 'Necesitas el link de invitación de este curso para poder acceder.',
+			) );
+			return;
+		}
+
 		$arbol = array();
 		foreach ( LMS_Module::all_by_course( $course_id ) as $modulo ) {
-			$subtemas = array();
-			foreach ( LMS_Subtopic::all_by_module( (int) $modulo->id ) as $subtema ) {
-				$subtemas[] = array(
-					'subtema'    => $subtema,
-					'contenidos' => LMS_Content::all_by_subtopic( (int) $subtema->id ),
-				);
-			}
 			$arbol[] = array(
 				'modulo'      => $modulo,
-				'subtemas'    => $subtemas,
+				'contenidos'  => LMS_Content::all_by_module( (int) $modulo->id ),
 				'n_preguntas' => LMS_Question::count_by_module( (int) $modulo->id ),
 				'aprobada'    => LMS_Evaluation::passed( $uid, (int) $modulo->id ),
 				'eval_url'    => $this->student_url( array( 'vista' => 'evaluacion', 'modulo' => (int) $modulo->id ) ),

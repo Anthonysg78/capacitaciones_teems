@@ -2,12 +2,12 @@
 /**
  * Vista: VISOR de curso del estudiante (solo lectura).
  *
- * Muestra la estructura del curso: módulos → subtemas → contenidos. El texto
- * se lee en línea; el video, PDF o recurso se abren con un botón.
+ * Muestra la estructura del curso: módulos → contenidos. El texto se lee en
+ * línea; el video, PDF o recurso se abren con un botón.
  *
  * Variables recibidas:
  *   $curso        object  curso que se está viendo
- *   $arbol        array   módulos anidados con subtemas y contenidos
+ *   $arbol        array   módulos con sus contenidos
  *   $volver_url   string  URL para volver a "Mis cursos"
  *   $completados  array   ids de contenidos ya completados por el usuario
  *   $hechos       int     cuántos contenidos completó
@@ -15,7 +15,7 @@
  *   $percent      int     porcentaje de avance (0-100)
  *   $viewer_url   string  URL de esta página (para volver tras marcar)
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -69,7 +69,7 @@ $btn_lbl = array(
 		<?php foreach ( $arbol as $nodo_m ) : ?>
 			<?php
 			$m           = $nodo_m['modulo'];
-			$subtemas    = $nodo_m['subtemas'];
+			$contenidos  = $nodo_m['contenidos'];
 			$n_preguntas = $nodo_m['n_preguntas'];
 			$aprobada    = $nodo_m['aprobada'];
 			$eval_url    = $nodo_m['eval_url'];
@@ -80,63 +80,64 @@ $btn_lbl = array(
 					<h2 class="lms-vmod__title"><?php echo esc_html( $m->title ); ?></h2>
 				</div>
 
-				<?php if ( empty( $subtemas ) ) : ?>
-					<p class="lms-tempty">Este módulo aún no tiene subtemas.</p>
+				<?php if ( empty( $contenidos ) ) : ?>
+					<p class="lms-tempty">Este módulo aún no tiene contenidos.</p>
 				<?php else : ?>
-					<?php foreach ( $subtemas as $nodo_s ) : ?>
+					<?php foreach ( $contenidos as $c ) : ?>
 						<?php
-						$s          = $nodo_s['subtema'];
-						$contenidos = $nodo_s['contenidos'];
+						$tipo_lbl = isset( $tipos_lbl[ $c->type ] ) ? $tipos_lbl[ $c->type ] : $c->type;
+						$tipo_ico = isset( $tipos_ico[ $c->type ] ) ? $tipos_ico[ $c->type ] : 'bi-dot';
+						$done     = in_array( (int) $c->id, $completados, true );
 						?>
-						<div class="lms-vsub">
-							<h3 class="lms-vsub__title"><?php echo esc_html( $s->title ); ?></h3>
-							<?php if ( ! empty( $s->description ) ) : ?>
-								<p class="lms-vsub__desc"><?php echo esc_html( $s->description ); ?></p>
-							<?php endif; ?>
+						<div class="lms-vcontent lms-vcontent--<?php echo esc_attr( $c->type ); ?><?php echo $done ? ' is-done' : ''; ?>">
+							<div class="lms-vcontent__head">
+								<span class="lms-tleaf__icon"><i class="bi <?php echo esc_attr( $tipo_ico ); ?>"></i></span>
+								<span class="lms-vcontent__title"><?php echo esc_html( $c->title ); ?></span>
+								<span class="lms-tleaf__type"><?php echo esc_html( $tipo_lbl ); ?></span>
+							</div>
 
-							<?php if ( empty( $contenidos ) ) : ?>
-								<p class="lms-tempty">Este subtema aún no tiene contenidos.</p>
+							<?php if ( 'texto' === $c->type ) : ?>
+								<?php if ( '' !== trim( (string) $c->content_text ) ) : ?>
+									<div class="lms-vcontent__text"><?php echo wpautop( wp_kses_post( $c->content_text ) ); ?></div>
+								<?php endif; ?>
+							<?php elseif ( 'video' === $c->type && ! empty( $c->content_url ) ) : ?>
+								<?php $embed = wp_oembed_get( $c->content_url ); // YouTube/Vimeo → reproductor incrustado. ?>
+								<?php if ( $embed ) : ?>
+									<div class="lms-vembed"><?php echo $embed; // phpcs:ignore WordPress.Security.EscapeOutput -- HTML oembed de WordPress (proveedor confiable). ?></div>
+								<?php elseif ( preg_match( '/\.(mp4|webm|ogv|ogg)(\?.*)?$/i', $c->content_url ) ) : ?>
+									<video class="lms-vvideo" controls preload="metadata" src="<?php echo esc_url( $c->content_url ); ?>"></video>
+								<?php else : ?>
+									<a class="lms-btn-outline lms-btn-outline--sm" href="<?php echo esc_url( $c->content_url ); ?>" target="_blank" rel="noopener noreferrer">
+										<i class="bi bi-play-circle"></i> Ver video <i class="bi bi-box-arrow-up-right"></i>
+									</a>
+								<?php endif; ?>
+							<?php elseif ( 'pdf' === $c->type && ! empty( $c->content_url ) ) : ?>
+								<div class="lms-vpdf">
+									<iframe src="<?php echo esc_url( $c->content_url ); ?>#toolbar=1" title="<?php echo esc_attr( $c->title ); ?>" loading="lazy"></iframe>
+								</div>
+								<a class="lms-vpdf__open" href="<?php echo esc_url( $c->content_url ); ?>" target="_blank" rel="noopener noreferrer">
+									<i class="bi bi-box-arrow-up-right"></i> Abrir el PDF en pestaña nueva
+								</a>
+							<?php elseif ( ! empty( $c->content_url ) ) : ?>
+								<a class="lms-btn-outline lms-btn-outline--sm" href="<?php echo esc_url( $c->content_url ); ?>" target="_blank" rel="noopener noreferrer">
+									<i class="bi <?php echo esc_attr( $tipo_ico ); ?>"></i>
+									<?php echo esc_html( isset( $btn_lbl[ $c->type ] ) ? $btn_lbl[ $c->type ] : 'Abrir' ); ?>
+									<i class="bi bi-box-arrow-up-right"></i>
+								</a>
 							<?php else : ?>
-								<?php foreach ( $contenidos as $c ) : ?>
-									<?php
-									$tipo_lbl = isset( $tipos_lbl[ $c->type ] ) ? $tipos_lbl[ $c->type ] : $c->type;
-									$tipo_ico = isset( $tipos_ico[ $c->type ] ) ? $tipos_ico[ $c->type ] : 'bi-dot';
-									?>
-									<?php $done = in_array( (int) $c->id, $completados, true ); ?>
-									<div class="lms-vcontent lms-vcontent--<?php echo esc_attr( $c->type ); ?><?php echo $done ? ' is-done' : ''; ?>">
-										<div class="lms-vcontent__head">
-											<span class="lms-tleaf__icon"><i class="bi <?php echo esc_attr( $tipo_ico ); ?>"></i></span>
-											<span class="lms-vcontent__title"><?php echo esc_html( $c->title ); ?></span>
-											<span class="lms-tleaf__type"><?php echo esc_html( $tipo_lbl ); ?></span>
-										</div>
-
-										<?php if ( 'texto' === $c->type ) : ?>
-											<?php if ( '' !== trim( (string) $c->content_text ) ) : ?>
-												<div class="lms-vcontent__text"><?php echo wpautop( wp_kses_post( $c->content_text ) ); ?></div>
-											<?php endif; ?>
-										<?php elseif ( ! empty( $c->content_url ) ) : ?>
-											<a class="lms-btn-outline lms-btn-outline--sm" href="<?php echo esc_url( $c->content_url ); ?>" target="_blank" rel="noopener noreferrer">
-												<i class="bi <?php echo esc_attr( $tipo_ico ); ?>"></i>
-												<?php echo esc_html( isset( $btn_lbl[ $c->type ] ) ? $btn_lbl[ $c->type ] : 'Abrir' ); ?>
-												<i class="bi bi-box-arrow-up-right"></i>
-											</a>
-										<?php else : ?>
-											<p class="lms-tempty">Este contenido aún no tiene enlace.</p>
-										<?php endif; ?>
-
-										<form class="lms-vcontent__foot" method="post" action="<?php echo esc_url( $viewer_url ); ?>">
-											<input type="hidden" name="lms_action" value="toggle_progress">
-											<input type="hidden" name="content_id" value="<?php echo (int) $c->id; ?>">
-											<input type="hidden" name="redirect" value="<?php echo esc_url( $viewer_url ); ?>">
-											<?php wp_nonce_field( 'lms_toggle_progress' ); ?>
-											<button type="submit" class="lms-checkbtn<?php echo $done ? ' is-done' : ''; ?>">
-												<i class="bi <?php echo $done ? 'bi-check-circle-fill' : 'bi-circle'; ?>"></i>
-												<?php echo $done ? 'Completado' : 'Marcar como completado'; ?>
-											</button>
-										</form>
-									</div>
-								<?php endforeach; ?>
+								<p class="lms-tempty">Este contenido aún no tiene enlace.</p>
 							<?php endif; ?>
+
+							<form class="lms-vcontent__foot" method="post" action="<?php echo esc_url( $viewer_url ); ?>">
+								<input type="hidden" name="lms_action" value="toggle_progress">
+								<input type="hidden" name="content_id" value="<?php echo (int) $c->id; ?>">
+								<input type="hidden" name="redirect" value="<?php echo esc_url( $viewer_url ); ?>">
+								<?php wp_nonce_field( 'lms_toggle_progress' ); ?>
+								<button type="submit" class="lms-checkbtn<?php echo $done ? ' is-done' : ''; ?>">
+									<i class="bi <?php echo $done ? 'bi-check-circle-fill' : 'bi-circle'; ?>"></i>
+									<?php echo $done ? 'Completado' : 'Marcar como completado'; ?>
+								</button>
+							</form>
 						</div>
 					<?php endforeach; ?>
 				<?php endif; ?>

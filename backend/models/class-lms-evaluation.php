@@ -74,6 +74,29 @@ class LMS_Evaluation {
 	}
 
 	/**
+	 * ¿El usuario COMPLETÓ el curso? = aprobó la evaluación de TODOS los módulos
+	 * que tienen preguntas. Los módulos sin preguntas no bloquean. Devuelve true
+	 * solo si había al menos una evaluación y todas están aprobadas. Esta es la
+	 * condición para emitir el certificado del curso.
+	 */
+	public static function course_passed( $user_id, $course_id ) {
+		$modulos = LMS_Module::all_by_course( $course_id );
+		if ( empty( $modulos ) ) {
+			return false;
+		}
+		$hay_evaluacion = false;
+		foreach ( $modulos as $m ) {
+			if ( LMS_Question::count_by_module( (int) $m->id ) > 0 ) {
+				$hay_evaluacion = true;
+				if ( ! self::passed( $user_id, (int) $m->id ) ) {
+					return false;
+				}
+			}
+		}
+		return $hay_evaluacion;
+	}
+
+	/**
 	 * ¿Puede el usuario rendir (o reintentar) la evaluación?
 	 * No si ya aprobó o si ya gastó los 2 intentos.
 	 */

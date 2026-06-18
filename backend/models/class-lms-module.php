@@ -98,7 +98,11 @@ class LMS_Module {
 
 	public static function delete( $id ) {
 		global $wpdb;
-		$res = $wpdb->delete( self::table(), array( 'id' => absint( $id ) ), array( '%d' ) );
+		$id = absint( $id );
+		// Borramos primero los contenidos del módulo (cuelgan de él directamente),
+		// para no dejar filas huérfanas en wp_lms_contents.
+		$wpdb->delete( $wpdb->prefix . 'lms_contents', array( 'module_id' => $id ), array( '%d' ) );
+		$res = $wpdb->delete( self::table(), array( 'id' => $id ), array( '%d' ) );
 		return false !== $res;
 	}
 }

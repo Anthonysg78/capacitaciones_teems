@@ -65,11 +65,25 @@ class LMS_Course_Actions {
 		}
 
 		if ( $id ) {
+			// Edición: guardamos y volvemos a donde estábamos (la lista).
 			LMS_Course::update( $id, $data );
-		} else {
-			LMS_Course::create( $data );
+			$this->redirigir( 'saved' );
 		}
-		$this->redirigir( 'saved' );
+
+		// Creación: guardamos y vamos DIRECTO al editor de estructura del curso
+		// nuevo, para empezar a añadir módulos → subtemas → contenidos sin pasos extra.
+		$new_id = LMS_Course::create( $data );
+		if ( $new_id ) {
+			$destino = add_query_arg(
+				array( 'accion' => 'modulos', 'id' => $new_id, 'msg' => 'saved' ),
+				$this->target()
+			);
+			wp_safe_redirect( $destino );
+			exit;
+		}
+
+		// Si por algo no se pudo crear, volvemos con error.
+		$this->redirigir( 'error' );
 	}
 
 	/**

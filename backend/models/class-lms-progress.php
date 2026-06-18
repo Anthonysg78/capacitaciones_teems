@@ -65,9 +65,8 @@ class LMS_Progress {
 			$wpdb->prepare(
 				"SELECT cp.content_id
 				 FROM {$p}content_progress cp
-				 INNER JOIN {$p}contents  c ON cp.content_id = c.id
-				 INNER JOIN {$p}subtopics s ON c.subtopic_id = s.id
-				 INNER JOIN {$p}modules   m ON s.module_id   = m.id
+				 INNER JOIN {$p}contents c ON cp.content_id = c.id
+				 INNER JOIN {$p}modules  m ON c.module_id   = m.id
 				 WHERE m.course_id = %d AND cp.user_id = %d",
 				absint( $course_id ),
 				absint( $user_id )
@@ -77,7 +76,7 @@ class LMS_Progress {
 	}
 
 	/**
-	 * Total de contenidos que tiene un curso (sumando todos sus subtemas).
+	 * Total de contenidos que tiene un curso (sumando todos sus módulos).
 	 */
 	public static function total_contents_in_course( $course_id ) {
 		global $wpdb;
@@ -85,9 +84,8 @@ class LMS_Progress {
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*)
-				 FROM {$p}contents  c
-				 INNER JOIN {$p}subtopics s ON c.subtopic_id = s.id
-				 INNER JOIN {$p}modules   m ON s.module_id   = m.id
+				 FROM {$p}contents c
+				 INNER JOIN {$p}modules m ON c.module_id = m.id
 				 WHERE m.course_id = %d",
 				absint( $course_id )
 			)

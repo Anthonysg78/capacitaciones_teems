@@ -91,6 +91,15 @@ class LMS_Evaluation_Actions {
 
 		LMS_Evaluation::record( $uid, $module_id, $attempt_number, $score, $passed, $answers );
 
+		// El certificado se emite SOLO al completar el CURSO completo (aprobar la
+		// evaluación de todos los módulos), no por módulo. Idempotente: no duplica.
+		if ( $passed ) {
+			$modulo = LMS_Module::find( $module_id );
+			if ( $modulo && LMS_Evaluation::course_passed( $uid, (int) $modulo->course_id ) ) {
+				LMS_Certificate::issue( $uid, (int) $modulo->course_id );
+			}
+		}
+
 		$this->redirigir();
 	}
 

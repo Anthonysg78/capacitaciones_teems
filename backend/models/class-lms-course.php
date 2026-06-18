@@ -110,4 +110,63 @@ class LMS_Course {
 		$res = $wpdb->delete( self::table(), array( 'id' => absint( $id ) ), array( '%d' ) );
 		return false !== $res;
 	}
+
+	/* ====================================================================
+	 *  CÓDIGO DE INVITACIÓN (link general del curso)
+	 * ==================================================================== */
+
+	/**
+	 * Genera un código alfanumérico único para el link de invitación.
+	 */
+	private static function generar_token() {
+		global $wpdb;
+		$tabla = self::table();
+		do {
+			$token = wp_generate_password( 10, false ); // 10 caracteres, sin símbolos.
+			$existe = $wpdb->get_var(
+				$wpdb->prepare( "SELECT id FROM {$tabla} WHERE invite_token = %s LIMIT 1", $token )
+			);
+		} while ( $existe );
+		return $token;
+	}
+
+	/**
+	 * Devuelve el código de invitación del curso; si no tiene, lo crea y guarda.
+	 */
+	public static function ensure_token( $course_id ) {
+		global $wpdb;
+		$tabla = self::table();
+		$id    = absint( $course_id );
+		$token = $wpdb->get_var( $wpdb->prepare( "SELECT invite_token FROM {$tabla} WHERE id = %d", $id ) );
+		if ( ! $token ) {
+			$token = self::generar_token();
+			$wpdb->update( $tabla, array( 'invite_token' => $token ), array( 'id' => $id ), array( '%s' ), array( '%d' ) );
+		}
+		return $token;
+	}
+
+	/**
+	 * Cambia el código (invalida el link anterior). Devuelve el nuevo código.
+	 */
+	public static function regenerate_token( $course_id ) {
+		global $wpdb;
+		$token = self::generar_token();
+		$wpdb->update( self::table(), array( 'invite_token' => $token ), array( 'id' => absint( $course_id ) ), array( '%s' ), array( '%d' ) );
+		return $token;
+	}
+
+	/**
+	 * Busca un curso por su código de invitación. Devuelve el objeto o null.
+	 */
+	public static function find_by_invite_token( $token ) {
+		global $wpdb;
+		$tabla = self::table();
+		$token = sanitize_text_field( $token );
+		if ( '' === $token ) {
+			return null;
+		}
+		return $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$tabla} WHERE invite_token = %s LIMIT 1", $token )
+		);
+	}
 }

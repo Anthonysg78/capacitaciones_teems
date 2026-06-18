@@ -8,8 +8,9 @@
  *   $nombre        string  nombre completo del usuario
  *   $primer        string  primer nombre
  *   $iniciales     string  iniciales para el avatar
+ *   $logout_url    string  enlace para cerrar sesión
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<button class="lms-burger" type="button" data-nav-toggle aria-label="Abrir menú">
 			<i class="bi bi-list"></i>
 		</button>
-		<span class="lms-topbar__brand-mobile"><i class="bi bi-mortarboard-fill"></i> Teems</span>
+		<span class="lms-topbar__brand-mobile"><i class="bi bi-mortarboard-fill"></i> Teamms</span>
 		<div class="lms-topbar__greet">
 			Bienvenido de nuevo, <span><?php echo esc_html( $primer ); ?></span>
 		</div>
@@ -40,6 +41,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<small><?php echo esc_html( $perfil_label ); ?></small>
 			</span>
 		</div>
+		<?php if ( ! empty( $logout_url ) ) : ?>
+			<a class="lms-logout" href="<?php echo esc_url( $logout_url ); ?>" title="Cerrar sesión">
+				<i class="bi bi-box-arrow-right"></i>
+			</a>
+		<?php endif; ?>
 	</div>
 </header>
 

@@ -22,6 +22,11 @@ class LMS_Activator {
 	public static function activate() {
 		self::create_tables();
 
+		// Crear los roles propios del LMS (admin, empresa, estudiante).
+		if ( class_exists( 'LMS_Roles' ) ) {
+			LMS_Roles::register();
+		}
+
 		// Guardamos la versión de la base de datos. Nos servirá en el futuro
 		// para saber si hay que actualizar tablas cuando saquemos versiones nuevas.
 		update_option( 'teems_lms_db_version', TEEMS_LMS_VERSION );
@@ -91,8 +96,10 @@ class LMS_Activator {
 			description longtext DEFAULT NULL,
 			thumbnail_url varchar(500) DEFAULT NULL,
 			published tinyint(1) NOT NULL DEFAULT 0,
+			invite_token varchar(20) DEFAULT NULL,
 			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			PRIMARY KEY  (id)
+			PRIMARY KEY  (id),
+			UNIQUE KEY invite_token (invite_token)
 		) $collate;";
 
 		// 5) Módulos.
@@ -118,10 +125,10 @@ class LMS_Activator {
 			KEY module_id (module_id)
 		) $collate;";
 
-		// 7) Contenidos (texto, video, pdf, recurso).
+		// 7) Contenidos (texto, video, pdf, recurso). Cuelgan directo del MÓDULO.
 		$sql[] = "CREATE TABLE {$prefix}contents (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-			subtopic_id bigint(20) unsigned NOT NULL,
+			module_id bigint(20) unsigned NOT NULL,
 			type varchar(20) NOT NULL,
 			title varchar(255) NOT NULL,
 			content_text longtext DEFAULT NULL,
@@ -129,7 +136,7 @@ class LMS_Activator {
 			order_index int NOT NULL DEFAULT 0,
 			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id),
-			KEY subtopic_id (subtopic_id)
+			KEY module_id (module_id)
 		) $collate;";
 
 		// 8) Inscripciones.
@@ -202,11 +209,11 @@ class LMS_Activator {
 			KEY question_id (question_id)
 		) $collate;";
 
-		// 14) Certificados.
+		// 14) Certificados. Se emiten al COMPLETAR un CURSO (uno por curso/usuario).
 		$sql[] = "CREATE TABLE {$prefix}certificates (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) unsigned NOT NULL,
-			module_id bigint(20) unsigned NOT NULL,
+			course_id bigint(20) unsigned NOT NULL,
 			issued_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			unique_code varchar(36) NOT NULL,
 			pdf_url varchar(500) DEFAULT NULL,
@@ -214,7 +221,7 @@ class LMS_Activator {
 			PRIMARY KEY  (id),
 			UNIQUE KEY unique_code (unique_code),
 			KEY user_id (user_id),
-			KEY module_id (module_id)
+			KEY course_id (course_id)
 		) $collate;";
 
 		// 15) Insignias (catálogo).

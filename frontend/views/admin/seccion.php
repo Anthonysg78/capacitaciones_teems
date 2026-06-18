@@ -21,5 +21,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="lms-empty">
 	<i class="bi <?php echo esc_attr( $icono ); ?>"></i>
 	<p>La gestión de <strong><?php echo esc_html( $titulo ); ?></strong> estará disponible muy pronto.</p>
-	<a class="lms-course__btn d-inline-flex" href="<?php echo esc_url( remove_query_arg( array( 'vista', 'id' ) ) ); ?>"><i class="bi bi-arrow-left"></i> Volver al panel</a>
+	<a class="lms-btn d-inline-flex" 
+	href="<?php echo esc_url( remove_query_arg( array( 'vista', 'id' ) ) ); ?>"><i class="bi bi-arrow-left"></i> Volver al panel</a>
 </div>
