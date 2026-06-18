@@ -2,14 +2,13 @@
 /**
  * Roles y control de acceso del LMS.
  *
- * Define tres roles propios (todos son usuarios de WordPress por dentro, pero
+ * Define dos roles propios (todos son usuarios de WordPress por dentro, pero
  * eso es invisible para el usuario final):
  *   - lms_admin    → administra la plataforma (capacidad 'lms_manage').
- *   - lms_company  → empresa que supervisa a sus colaboradores ('lms_company').
- *   - lms_student  → colaborador que toma cursos ('lms_student').
+ *   - lms_student  → estudiante que toma cursos ('lms_student').
  *
- * Además, BLOQUEA el escritorio de WordPress (/wp-admin) a los usuarios
- * externos (empresa y estudiante): ellos solo deben ver el LMS, nunca WordPress.
+ * Además, BLOQUEA el escritorio de WordPress (/wp-admin) a los estudiantes:
+ * ellos solo deben ver el LMS, nunca WordPress.
  *
  * @package TeammsLMS
  */
@@ -26,7 +25,6 @@ class LMS_Roles {
 	 */
 	public static function register() {
 		add_role( 'lms_admin',   'Administrador LMS', array( 'read' => true, 'lms_manage'  => true ) );
-		add_role( 'lms_company', 'Empresa',           array( 'read' => true, 'lms_company' => true ) );
 		add_role( 'lms_student', 'Estudiante',        array( 'read' => true, 'lms_student' => true ) );
 
 		// El administrador de WordPress también puede gestionar el LMS.
@@ -53,7 +51,7 @@ class LMS_Roles {
 	}
 
 	/**
-	 * ¿El usuario actual es "externo" (empresa o estudiante, sin poderes de admin)?
+	 * ¿El usuario actual es "externo" (estudiante, sin poderes de admin)?
 	 * Los administradores de WordPress y los lms_admin NO son externos.
 	 */
 	public function is_external_user() {
@@ -63,7 +61,7 @@ class LMS_Roles {
 		if ( current_user_can( 'manage_options' ) || current_user_can( 'lms_manage' ) ) {
 			return false;
 		}
-		return current_user_can( 'lms_company' ) || current_user_can( 'lms_student' );
+		return current_user_can( 'lms_student' );
 	}
 
 	/**

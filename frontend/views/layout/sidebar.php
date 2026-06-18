@@ -3,7 +3,7 @@
  * Vista: menú lateral (sidebar).
  *
  * Variables recibidas:
- *   $perfil        string  perfil actual (admin|empresa|estudiante)
+ *   $perfil        string  perfil actual (admin|estudiante)
  *   $perfil_label  string  etiqueta legible del perfil
  *   $nav           array   ítems del menú [ clave => [ etiqueta, icono ] ]
  *   $vista_actual  string  vista activa

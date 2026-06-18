@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Capacitaciones Teamms
  * Plugin URI:        https://teems.local
- * Description:       Plataforma de capacitación empresarial privada (LMS) para WordPress. Empresas, cursos, evaluaciones, certificados con QR e insignias. Acceso solo por invitación.
+ * Description:       Plataforma de capacitación privada (LMS) para WordPress. Cursos, evaluaciones, certificados con QR e insignias. Acceso solo por invitación.
  * Version:           0.14.0
  * Requires at least: 6.0
  * Requires PHP:      8.0
@@ -82,7 +82,6 @@ function teems_lms_run() {
 	new LMS_Enroll_Actions();
 
 	// Modelos (acceso a datos) — disponibles tanto en frontend como en backend.
-	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-company.php';
 	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-course.php';
 	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-enrollment.php';
 	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-module.php';
@@ -92,15 +91,13 @@ function teems_lms_run() {
 	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-evaluation.php';
 	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-certificate.php';
 
-	// Acciones de formularios: guardar/borrar empresas, cursos, módulos, subtemas, contenidos, progreso, preguntas y evaluación.
-	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-company-actions.php';
+	// Acciones de formularios: guardar/borrar cursos, módulos, contenidos, progreso, preguntas y evaluación.
 	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-course-actions.php';
 	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-module-actions.php';
 	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-content-actions.php';
 	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-progress-actions.php';
 	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-question-actions.php';
 	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-evaluation-actions.php';
-	new LMS_Company_Actions();
 	new LMS_Course_Actions();
 	new LMS_Module_Actions();
 	new LMS_Content_Actions();

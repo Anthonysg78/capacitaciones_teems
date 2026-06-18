@@ -22,7 +22,7 @@ class LMS_Activator {
 	public static function activate() {
 		self::create_tables();
 
-		// Crear los roles propios del LMS (admin, empresa, estudiante).
+		// Crear los roles propios del LMS (admin, estudiante).
 		if ( class_exists( 'LMS_Roles' ) ) {
 			LMS_Roles::register();
 		}
@@ -54,29 +54,7 @@ class LMS_Activator {
 		// Juntamos todas las sentencias en un arreglo y las pasamos a dbDelta.
 		$sql = array();
 
-		// 1) Empresas.
-		$sql[] = "CREATE TABLE {$prefix}companies (
-			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-			name varchar(255) NOT NULL,
-			logo_url varchar(500) DEFAULT NULL,
-			contact_email varchar(255) DEFAULT NULL,
-			active tinyint(1) NOT NULL DEFAULT 1,
-			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			PRIMARY KEY  (id)
-		) $collate;";
-
-		// 2) Relación usuario <-> empresa.
-		$sql[] = "CREATE TABLE {$prefix}user_company (
-			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-			user_id bigint(20) unsigned NOT NULL,
-			company_id bigint(20) unsigned NOT NULL,
-			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			PRIMARY KEY  (id),
-			KEY user_id (user_id),
-			KEY company_id (company_id)
-		) $collate;";
-
-		// 3) Invitaciones (tokens de activación de cuenta).
+		// 1) Invitaciones (tokens de activación de cuenta).
 		$sql[] = "CREATE TABLE {$prefix}invitations (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) unsigned NOT NULL,
@@ -89,7 +67,7 @@ class LMS_Activator {
 			KEY user_id (user_id)
 		) $collate;";
 
-		// 4) Cursos.
+		// 2) Cursos.
 		$sql[] = "CREATE TABLE {$prefix}courses (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			title varchar(255) NOT NULL,
@@ -102,7 +80,7 @@ class LMS_Activator {
 			UNIQUE KEY invite_token (invite_token)
 		) $collate;";
 
-		// 5) Módulos.
+		// 3) Módulos.
 		$sql[] = "CREATE TABLE {$prefix}modules (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			course_id bigint(20) unsigned NOT NULL,
@@ -113,7 +91,7 @@ class LMS_Activator {
 			KEY course_id (course_id)
 		) $collate;";
 
-		// 6) Subtemas.
+		// 4) Subtemas.
 		$sql[] = "CREATE TABLE {$prefix}subtopics (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			module_id bigint(20) unsigned NOT NULL,
@@ -125,7 +103,7 @@ class LMS_Activator {
 			KEY module_id (module_id)
 		) $collate;";
 
-		// 7) Contenidos (texto, video, pdf, recurso). Cuelgan directo del MÓDULO.
+		// 5) Contenidos (texto, video, pdf, recurso). Cuelgan directo del MÓDULO.
 		$sql[] = "CREATE TABLE {$prefix}contents (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			module_id bigint(20) unsigned NOT NULL,
@@ -139,7 +117,7 @@ class LMS_Activator {
 			KEY module_id (module_id)
 		) $collate;";
 
-		// 8) Inscripciones.
+		// 6) Inscripciones.
 		$sql[] = "CREATE TABLE {$prefix}enrollments (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) unsigned NOT NULL,
@@ -151,7 +129,7 @@ class LMS_Activator {
 			KEY course_id (course_id)
 		) $collate;";
 
-		// 9) Progreso por contenido.
+		// 7) Progreso por contenido.
 		$sql[] = "CREATE TABLE {$prefix}content_progress (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) unsigned NOT NULL,
@@ -162,7 +140,7 @@ class LMS_Activator {
 			KEY content_id (content_id)
 		) $collate;";
 
-		// 10) Banco de preguntas.
+		// 8) Banco de preguntas.
 		$sql[] = "CREATE TABLE {$prefix}questions (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			module_id bigint(20) unsigned NOT NULL,
@@ -173,7 +151,7 @@ class LMS_Activator {
 			KEY module_id (module_id)
 		) $collate;";
 
-		// 11) Opciones de cada pregunta (4 por pregunta).
+		// 9) Opciones de cada pregunta (4 por pregunta).
 		$sql[] = "CREATE TABLE {$prefix}question_options (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			question_id bigint(20) unsigned NOT NULL,
@@ -183,7 +161,7 @@ class LMS_Activator {
 			KEY question_id (question_id)
 		) $collate;";
 
-		// 12) Intentos de evaluación.
+		// 10) Intentos de evaluación.
 		$sql[] = "CREATE TABLE {$prefix}evaluation_attempts (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) unsigned NOT NULL,
@@ -198,7 +176,7 @@ class LMS_Activator {
 			KEY module_id (module_id)
 		) $collate;";
 
-		// 13) Respuestas dadas en cada intento.
+		// 11) Respuestas dadas en cada intento.
 		$sql[] = "CREATE TABLE {$prefix}attempt_answers (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			attempt_id bigint(20) unsigned NOT NULL,
@@ -209,7 +187,7 @@ class LMS_Activator {
 			KEY question_id (question_id)
 		) $collate;";
 
-		// 14) Certificados. Se emiten al COMPLETAR un CURSO (uno por curso/usuario).
+		// 12) Certificados. Se emiten al COMPLETAR un CURSO (uno por curso/usuario).
 		$sql[] = "CREATE TABLE {$prefix}certificates (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) unsigned NOT NULL,
@@ -224,7 +202,7 @@ class LMS_Activator {
 			KEY course_id (course_id)
 		) $collate;";
 
-		// 15) Insignias (catálogo).
+		// 13) Insignias (catálogo).
 		$sql[] = "CREATE TABLE {$prefix}badges (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			name varchar(255) NOT NULL,
@@ -234,7 +212,7 @@ class LMS_Activator {
 			PRIMARY KEY  (id)
 		) $collate;";
 
-		// 16) Insignias obtenidas por usuario.
+		// 14) Insignias obtenidas por usuario.
 		$sql[] = "CREATE TABLE {$prefix}user_badges (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) unsigned NOT NULL,
@@ -245,7 +223,7 @@ class LMS_Activator {
 			KEY badge_id (badge_id)
 		) $collate;";
 
-		// 17) Log de actividad.
+		// 15) Log de actividad.
 		$sql[] = "CREATE TABLE {$prefix}activity_log (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) unsigned NOT NULL,

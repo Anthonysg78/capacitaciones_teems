@@ -65,14 +65,13 @@ class LMS_Admin {
 		// Contamos registros de varias tablas. Por ahora darán 0 (están vacías),
 		// pero esto demuestra que el plugin SÍ se conecta a la base de datos.
 		$stats = array(
-			'empresas'     => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}companies" ),
 			'cursos'       => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}courses" ),
 			'modulos'      => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}modules" ),
 			'inscripciones'=> (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}enrollments" ),
 			'certificados' => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}certificates" ),
 		);
 
-		// Verificamos cuántas tablas wp_lms_ existen (deberían ser 17).
+		// Verificamos cuántas tablas wp_lms_ existen (deberían ser 15).
 		$tablas_existentes = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM information_schema.tables

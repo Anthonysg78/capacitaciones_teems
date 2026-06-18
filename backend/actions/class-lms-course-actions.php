@@ -43,10 +43,9 @@ class LMS_Course_Actions {
 	 * Guardar (crear o editar) un curso.
 	 */
 	private function save() {
-		// NOTA: durante esta etapa NO atamos los permisos al login de WordPress
-		// (la plataforma es para empresas externas sin WP). El control de acceso
-		// real (roles propios + invitaciones) llegará en la Semana 2.
-		// Nonce (protección CSRF, funciona también sin login).
+		// NOTA: el control de acceso por rol ya existe (capacidad lms_manage);
+		// falta gatear cada acción admin con esa capacidad (pendiente al pulir).
+		// Nonce (protección CSRF).
 		$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
 		if ( ! wp_verify_nonce( $nonce, 'lms_save_course' ) ) {
 			$this->redirigir( 'expired' );

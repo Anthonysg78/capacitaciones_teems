@@ -15,14 +15,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Definimos las tarjetas de estadísticas en un arreglo para no repetir HTML.
 $tarjetas = array(
-	array( 'label' => 'Empresas',      'valor' => $stats['empresas'],      'icon' => 'building',   'color' => '#2563eb' ),
 	array( 'label' => 'Cursos',        'valor' => $stats['cursos'],        'icon' => 'book',       'color' => '#7c3aed' ),
 	array( 'label' => 'Módulos',       'valor' => $stats['modulos'],       'icon' => 'layers',     'color' => '#0891b2' ),
 	array( 'label' => 'Inscripciones', 'valor' => $stats['inscripciones'], 'icon' => 'users',      'color' => '#059669' ),
 	array( 'label' => 'Certificados',  'valor' => $stats['certificados'],  'icon' => 'award',      'color' => '#d97706' ),
 );
 
-$db_ok = ( 17 === $tablas_existentes );
+$db_ok = ( 15 === $tablas_existentes );
 ?>
 
 <div class="wrap lms-wrap">
@@ -43,7 +42,7 @@ $db_ok = ( 17 === $tablas_existentes );
 			<strong>Sistema operativo.</strong> Las <?php echo esc_html( $tablas_existentes ); ?> tablas de la base de datos están creadas y conectadas correctamente.
 		<?php else : ?>
 			<span class="lms-status__dot"></span>
-			<strong>Atención.</strong> Solo se detectaron <?php echo esc_html( $tablas_existentes ); ?> de 17 tablas. Desactiva y reactiva el plugin.
+			<strong>Atención.</strong> Solo se detectaron <?php echo esc_html( $tablas_existentes ); ?> de 15 tablas. Desactiva y reactiva el plugin.
 		<?php endif; ?>
 	</div>
 
@@ -62,13 +61,13 @@ $db_ok = ( 17 === $tablas_existentes );
 	<div class="lms-panel">
 		<h2 class="lms-panel__title">Próximos pasos del proyecto</h2>
 		<ul class="lms-steps">
-			<li class="lms-steps__done">Semana 1 — Estructura base y 17 tablas de la base de datos</li>
+			<li class="lms-steps__done">Semana 1 — Estructura base y 15 tablas de la base de datos</li>
 			<li class="lms-steps__current">Semana 2 — Roles del sistema, invitaciones y activación de cuenta</li>
-			<li>Semana 3 — Gestión de empresas y usuarios</li>
+			<li>Semana 3 — Gestión de usuarios</li>
 			<li>Semana 4 — Cursos, módulos y contenidos</li>
 			<li>Semana 5 en adelante — Contenidos, evaluaciones, certificados…</li>
 		</ul>
-		<p class="lms-note">Esta es una vista de bienvenida temporal. Las secciones reales (Empresas, Usuarios, Cursos…) se irán agregando semana a semana.</p>
+		<p class="lms-note">Esta es una vista de bienvenida temporal. Las secciones reales (Usuarios, Cursos…) se irán agregando semana a semana.</p>
 	</div>
 
 </div>

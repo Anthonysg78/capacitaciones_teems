@@ -166,9 +166,6 @@ class LMS_Public {
 		if ( current_user_can( 'manage_options' ) || current_user_can( 'lms_manage' ) ) {
 			return 'admin';
 		}
-		if ( current_user_can( 'lms_company' ) ) {
-			return 'empresa';
-		}
 		return 'estudiante';
 	}
 
@@ -177,17 +174,9 @@ class LMS_Public {
 			return array(
 				'dashboard' => array( 'Panel',           'bi-grid-1x2-fill' ),
 				'cursos'    => array( 'Cursos',          'bi-book' ),
-				'empresas'  => array( 'Empresas',        'bi-building' ),
 				'usuarios'  => array( 'Usuarios',        'bi-people' ),
 				'preguntas' => array( 'Banco preguntas', 'bi-patch-question' ),
 				'reportes'  => array( 'Reportes',        'bi-bar-chart' ),
-			);
-		}
-		if ( 'empresa' === $perfil ) {
-			return array(
-				'dashboard'     => array( 'Panel',         'bi-grid-1x2-fill' ),
-				'colaboradores' => array( 'Colaboradores', 'bi-people' ),
-				'reportes'      => array( 'Reportes',      'bi-bar-chart' ),
 			);
 		}
 		return array(
@@ -199,7 +188,7 @@ class LMS_Public {
 	}
 
 	private static function etiqueta_perfil( $perfil ) {
-		$map = array( 'admin' => 'Administrador', 'empresa' => 'Empresa', 'estudiante' => 'Estudiante' );
+		$map = array( 'admin' => 'Administrador', 'estudiante' => 'Estudiante' );
 		return isset( $map[ $perfil ] ) ? $map[ $perfil ] : 'Usuario';
 	}
 
@@ -315,10 +304,6 @@ class LMS_Public {
 			$this->content_admin( $vista );
 			return;
 		}
-		if ( 'empresa' === $perfil ) {
-			$this->view( 'company/panel' );
-			return;
-		}
 		$this->content_estudiante( $vista );
 	}
 
@@ -326,12 +311,6 @@ class LMS_Public {
 		// Sección Cursos: tiene lógica propia (lista + formulario).
 		if ( 'cursos' === $vista ) {
 			$this->content_admin_cursos();
-			return;
-		}
-
-		// Sección Empresas: lista + modal de crear/editar.
-		if ( 'empresas' === $vista ) {
-			$this->content_admin_empresas();
 			return;
 		}
 
@@ -351,24 +330,10 @@ class LMS_Public {
 		global $wpdb;
 		$p = $wpdb->prefix . 'lms_';
 		$this->view( 'admin/panel', array(
-			'empresas'      => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$p}companies" ),
 			'cursos'        => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$p}courses" ),
 			'modulos'       => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$p}modules" ),
 			'inscripciones' => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$p}enrollments" ),
 			'certificados'  => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$p}certificates" ),
-		) );
-	}
-
-	/**
-	 * Sección Empresas del admin: lista de empresas con modal crear/editar.
-	 */
-	private function content_admin_empresas() {
-		$msg      = isset( $_GET['msg'] ) ? sanitize_key( wp_unslash( $_GET['msg'] ) ) : '';
-		$list_url = add_query_arg( 'vista', 'empresas', get_permalink( get_the_ID() ) );
-		$this->view( 'admin/companies', array(
-			'empresas' => LMS_Company::all(),
-			'list_url' => $list_url,
-			'msg'      => $msg,
 		) );
 	}
 
