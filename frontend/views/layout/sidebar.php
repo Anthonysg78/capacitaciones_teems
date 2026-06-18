@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</nav>
 
 	<div class="lms-side__foot">
-		<a class="lms-side__link" href="<?php echo esc_url( add_query_arg( 'vista', 'login', remove_query_arg( array( 'perfil', 'id' ) ) ) ); ?>">
+		<a class="lms-side__link" href="<?php echo esc_url( add_query_arg( 'vista', 'login', remove_query_arg( 'id' ) ) ); ?>">
 			<i class="bi bi-box-arrow-right"></i>
 			<span>Cerrar sesión</span>
 		</a>

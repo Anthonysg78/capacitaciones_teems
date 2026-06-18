@@ -1,13 +1,16 @@
-# Capacitaciones Teamms — Plugin LMS Empresarial para WordPress
+# Capacitaciones Teamms — Plugin LMS para WordPress
 
-Plataforma de capacitación empresarial privada para WordPress. Las empresas inscriben
-colaboradores en cursos; los colaboradores avanzan por el contenido, rinden evaluaciones
+Plataforma de capacitación privada para WordPress. El administrador crea cursos e invita
+estudiantes por link; los estudiantes avanzan por el contenido, rinden evaluaciones
 y obtienen certificados con QR verificable. **Acceso solo por invitación. Sin registro público.**
+
+> **Alcance actual:** dos roles — **Administrador** y **Estudiante**. El antiguo rol "Empresa"
+> se retiró; el LMS es Admin ↔ Estudiante.
 
 - **Stack:** PHP 8 puro · WordPress 6.x · MySQL/MariaDB · Bootstrap 5 (CDN) · jQuery · WordPress AJAX
 - **Sin** React, Node, Composer en servidor, REST API ni TypeScript.
 - **Instalación:** se distribuye como ZIP instalable desde wp-admin → Plugins → Subir plugin.
-- **Versión actual:** `0.12.x`
+- **Versión actual:** `0.14.x`
 
 ---
 
@@ -41,13 +44,13 @@ teamms_capacitaciones/
 ├── teamms-capacitaciones.php          ← archivo principal (cabecera + arranque)
 │
 ├── backend/                          LÓGICA / SERVIDOR (no se ve)
-│   ├── core/                         ← activador (crea las 17 tablas), desactivador
+│   ├── core/                         ← activador (crea las 14 tablas), desactivador, roles
 │   ├── models/                       ← acceso a datos (1 clase por tabla):
-│   │                                    company · course · module · content ·
+│   │                                    course · module · content · enrollment ·
 │   │                                    progress · question · evaluation ·
 │   │                                    certificate
 │   ├── actions/                      ← guardar/borrar desde formularios:
-│   │                                    company · course · module · content ·
+│   │                                    auth · enroll · course · module · content ·
 │   │                                    progress · question · evaluation
 │   └── admin/                        ← panel wp-admin (class-lms-admin.php)
 │       └── views/                    ← dashboard.php (estadísticas reales)
@@ -57,11 +60,10 @@ teamms_capacitaciones/
 │   ├── templates/                    ← app-fullscreen.php (pantalla completa)
 │   └── views/                        ← vistas separadas por área:
 │       ├── layout/                   ← sidebar.php, topbar.php
-│       ├── auth/                     ← login.php (selector de rol DEMO)
+│       ├── auth/                     ← login.php, register.php (login real + crear cuenta)
 │       ├── admin/                    ← courses, course-form, structure,
 │       │                               module-form, content-form,
-│       │                               companies, panel, seccion
-│       ├── company/                  ← panel.php (placeholder)
+│       │                               panel, seccion
 │       ├── student/                  ← courses, course, evaluation,
 │       │                               evaluation-status, certificates,
 │       │                               certificate, empty
@@ -79,25 +81,27 @@ teamms_capacitaciones/
 
 ## ✅ Estado actual (qué funciona hoy)
 
-> El acceso todavía es **DEMO**: se elige rol con el selector de login o con `?perfil=admin|empresa|estudiante`.
-> Aún **no** hay login real ni invitaciones (es lo siguiente).
+> **Login real:** cada usuario inicia sesión con su cuenta. El rol se deduce de la cuenta
+> (Administrador o Estudiante); ya **no** hay selector demo.
 
 ### 🧱 Base e infraestructura
-- [x] Plugin instalable, activador con las **15 tablas** y desactivador seguro.
+- [x] Plugin instalable, activador con las **14 tablas**, desactivador seguro y roles propios.
+- [x] **Login real + roles propios** (Administrador / Estudiante); los estudiantes no ven
+      WordPress y se les bloquea `/wp-admin`.
+- [x] **Invitación por link + inscripción:** cada curso tiene un link; el estudiante crea su
+      cuenta o inicia sesión al abrirlo y queda inscrito. Solo ve sus cursos.
 - [x] App a **pantalla completa** vía shortcode `[teamms_capacitaciones]`, con aislamiento de estilos/JS
       del tema y otros plugins (no se descuadra el layout).
 - [x] Diseño responsive (sidebar + topbar; en móvil, menú tipo cajón).
-- [x] Tres roles enrutados (admin / empresa / estudiante) — por ahora con selector demo.
 
 ### 🛠️ Administrador
-- [x] **Dashboard** con estadísticas reales (empresas, cursos, módulos, inscripciones, certificados).
+- [x] **Dashboard** con estadísticas reales (cursos, módulos, inscripciones, certificados).
 - [x] **Cursos:** crear, editar, publicar/borrador y borrar.
 - [x] **Estructura del curso** en una sola pantalla (árbol Módulo → Contenido),
       con modales para crear/editar sin cambiar de página.
 - [x] **Contenidos:** texto, video (enlace), **PDF/recurso por subida de archivo** a la
       Biblioteca de Medios (o enlace externo).
 - [x] **Banco de preguntas** por módulo (varias opciones, una o varias correctas).
-- [x] **Empresas:** crear, editar, activar/desactivar y borrar (lista + modal).
 
 ### 🎓 Estudiante
 - [x] Catálogo de cursos publicados con % de avance.
@@ -114,16 +118,12 @@ teamms_capacitaciones/
 
 ## 🔜 Pendiente (roadmap)
 
-- [x] **Login real + roles propios** (Admin LMS / Empresa / Estudiante). Login propio en el
-      frontend; los usuarios externos no ven WordPress y se les bloquea `/wp-admin`.
-- [x] **Invitación por link + inscripciones:** cada curso tiene un link de invitación; el
-      estudiante crea su cuenta o inicia sesión al abrirlo y queda inscrito. Solo ve sus cursos.
-- [ ] **Panel de empresa:** avance, notas y certificados de *sus* colaboradores; que la empresa
-      también pueda invitar/gestionar a sus colaboradores.
-- [ ] **Panel de empresa:** avance, notas y certificados de *sus* colaboradores.
-- [ ] **Reportes** y exportación (Excel / PDF).
-- [ ] **Insignias** automáticas (completar módulo / aprobar / completar curso).
-- [ ] **Logo de empresa** y vínculo empresa ↔ colaboradores.
+- [ ] **Gestión de usuarios (admin):** crear usuarios e invitar desde el panel
+      (hoy la sección "Usuarios" es un placeholder).
+- [ ] **Reportes** y exportación (Excel / PDF): avance por curso/alumno, notas y certificados
+      (hoy la sección "Reportes" es un placeholder).
+- [ ] **Insignias** automáticas (completar módulo / aprobar / completar curso): las tablas
+      `badges`/`user_badges` existen pero aún no se usan.
 - [ ] (Opcional) Generar el **PDF del certificado** del lado servidor (DomPDF) en vez de imprimir desde el navegador.
 - [ ] Empaquetado en ZIP y documentación de entrega para el cliente.
 
@@ -139,14 +139,12 @@ teamms_capacitaciones/
 7. Todo certificado lleva QR con URL pública de validación.
 8. Módulo bloqueado hasta que el anterior esté completado y aprobado.
 9. El estudiante solo ve cursos en los que fue inscrito.
-10. La empresa solo ve datos de sus propios colaboradores.
-11. El plugin **no** modifica el tema ni otros plugins.
-12. Todas las tablas usan el prefijo `wp_lms_`.
+10. El plugin **no** modifica el tema ni otros plugins.
+11. Todas las tablas usan el prefijo `wp_lms_`.
 
 ---
 
-## 🗄️ Tablas de la base de datos (17)
-`companies` · `user_company` · `invitations` · `courses` · `modules` · `contents` ·
-`enrollments` · `content_progress` · `questions` · `question_options` ·
-`evaluation_attempts` · `attempt_answers` · `certificates` · `badges` · `user_badges` ·
-`activity_log` — todas con prefijo `wp_lms_`.
+## 🗄️ Tablas de la base de datos (14)
+`invitations` · `courses` · `modules` · `contents` · `enrollments` · `content_progress` ·
+`questions` · `question_options` · `evaluation_attempts` · `attempt_answers` ·
+`certificates` · `badges` · `user_badges` · `activity_log` — todas con prefijo `wp_lms_`.

@@ -215,7 +215,7 @@ class LMS_Public {
 			$codigo     = isset( $_GET['codigo'] ) ? sanitize_text_field( wp_unslash( $_GET['codigo'] ) ) : '';
 			$verify_url = add_query_arg(
 				array( 'vista' => 'verificar', 'codigo' => $codigo ),
-				remove_query_arg( array( 'vista', 'id', 'perfil', 'codigo' ) )
+				remove_query_arg( array( 'vista', 'id', 'codigo' ) )
 			);
 			ob_start();
 			$this->view( 'student/certificate', array(
@@ -229,7 +229,7 @@ class LMS_Public {
 		// A partir de aquí se requiere SESIÓN. Mostramos LOGIN o CREAR CUENTA
 		// (pantallas separadas): se elige con ?vista=registro; por defecto, login.
 		if ( ! is_user_logged_in() ) {
-			$base   = remove_query_arg( array( 'vista', 'id', 'perfil', 'err', 'lms_action', 'codigo', 'accion', 'msg', 'invite', 'invite_err' ) );
+			$base   = remove_query_arg( array( 'vista', 'id', 'err', 'lms_action', 'codigo', 'accion', 'msg', 'invite', 'invite_err' ) );
 			$invite = isset( $_GET['invite'] ) ? sanitize_text_field( wp_unslash( $_GET['invite'] ) ) : '';
 			$curso  = $invite ? LMS_Course::find_by_invite_token( $invite ) : null;
 			if ( $invite && ! $curso ) {
@@ -534,14 +534,9 @@ class LMS_Public {
 	}
 
 	/**
-	 * Construye una URL de la app conservando el perfil demo (?perfil=...).
-	 * Sin esto, al navegar/volver el sistema trataría al estudiante como admin.
+	 * Construye una URL de la app (esta misma página + los parámetros dados).
 	 */
 	private function student_url( $args ) {
-		$perfil = isset( $_GET['perfil'] ) ? sanitize_key( wp_unslash( $_GET['perfil'] ) ) : '';
-		if ( $perfil ) {
-			$args['perfil'] = $perfil;
-		}
 		return add_query_arg( $args, get_permalink( get_the_ID() ) );
 	}
 

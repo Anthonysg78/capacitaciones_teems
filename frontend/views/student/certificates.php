@@ -4,7 +4,7 @@
  *
  * Variables recibidas:
  *   $certs  array   certificados (con course_title, unique_code, issued_at)
- *   $base   string  URL base de la app (con el perfil) para armar los enlaces
+ *   $base   string  URL base de la app para armar los enlaces
  *
  * @package TeammsLMS
  */
