@@ -7,6 +7,7 @@
  *   $perfil_label  string  etiqueta legible del perfil
  *   $nav           array   ítems del menú [ clave => [ etiqueta, icono ] ]
  *   $vista_actual  string  vista activa
+ *   $logout_url    string  enlace real para cerrar sesión (mismo que el topbar)
  *
  * @package TeammsLMS
  */
@@ -39,9 +40,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</nav>
 
 	<div class="lms-side__foot">
-		<a class="lms-side__link" href="<?php echo esc_url( add_query_arg( 'vista', 'login', remove_query_arg( 'id' ) ) ); ?>">
-			<i class="bi bi-box-arrow-right"></i>
-			<span>Cerrar sesión</span>
-		</a>
+		<?php if ( ! empty( $logout_url ) ) : ?>
+			<a class="lms-side__link" href="<?php echo esc_url( $logout_url ); ?>">
+				<i class="bi bi-box-arrow-right"></i>
+				<span>Cerrar sesión</span>
+			</a>
+		<?php endif; ?>
 	</div>
 </aside>

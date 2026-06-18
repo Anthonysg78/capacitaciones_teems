@@ -280,6 +280,7 @@ class LMS_Public {
 			'perfil_label' => $label,
 			'nav'          => $nav,
 			'vista_actual' => $vista,
+			'logout_url'   => $logout_url,
 		) );
 		echo '<div class="lms-main">';
 		$this->view( 'layout/topbar', array(

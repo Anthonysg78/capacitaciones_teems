@@ -18,11 +18,11 @@ y obtienen certificados con QR verificable. **Acceso solo por invitación. Sin r
 
 | Dato | Valor |
 |---|---|
-| WordPress | `C:\xampp\htdocs\wordpress-7.0\wordpress` |
-| Carpeta del plugin (se edita aquí) | `C:\Users\sagba\OneDrive\Escritorio\teamms_capacitaciones` |
-| Enlace a WP | junction → `wp-content\plugins\teamms_capacitaciones` |
-| URL admin | http://localhost/wordpress-7.0/wordpress/wp-admin |
-| Sitio del LMS | `http://localhost/teamms` (WordPress dedicado, separado de Accons) |
+| WordPress (instalación activa) | `C:\xampp\htdocs\teamms` |
+| Carpeta del plugin (se edita aquí) | `C:\dev\teamms_capacitaciones` |
+| Enlace a WP | junction → `C:\xampp\htdocs\teamms\wp-content\plugins\teamms_capacitaciones` |
+| URL admin (local) | http://localhost/teamms/wp-admin |
+| Sitio del LMS | local: `http://localhost/teamms` · producción: `https://teamms.ec` |
 | Base de datos | `teamms_capacitaciones` · user `root` · sin pass · `127.0.0.1:3307` |
 | Prefijo de tablas | `wp_lms_` |
 | Shortcode de la app | `[teamms_capacitaciones]` (en cualquier página → carga el LMS a pantalla completa) |
