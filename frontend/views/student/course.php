@@ -1,3 +1,4 @@
+
 <?php
 /**
  * Vista: VISOR de curso del estudiante (solo lectura).

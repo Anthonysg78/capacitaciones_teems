@@ -608,6 +608,7 @@ class LMS_Public {
 			'rendir_url'   => $rendir_url,
 			'back_url'     => $back_url,
 		) );
+		
 	}
 
 }
