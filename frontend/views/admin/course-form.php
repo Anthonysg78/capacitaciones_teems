@@ -6,7 +6,7 @@
  *   $curso     object|null  curso a editar, o null si es nuevo
  *   $list_url  string       URL de la lista (volver / redirigir)
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

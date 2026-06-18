@@ -8,7 +8,7 @@
  *
  * Reglas: máximo 2 intentos por módulo, nota mínima 7 para aprobar.
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

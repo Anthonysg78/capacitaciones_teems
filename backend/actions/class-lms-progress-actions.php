@@ -5,7 +5,7 @@
  * Mismo patrón que el resto: 'template_redirect' + nonce (CSRF). Guarda el
  * progreso del usuario ACTUAL de WordPress y vuelve al visor del curso.
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

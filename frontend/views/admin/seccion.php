@@ -7,7 +7,7 @@
  *   $icono   string  clase del icono Bootstrap
  *   $texto   string  descripción de lo que hará la sección
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

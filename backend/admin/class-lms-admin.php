@@ -5,7 +5,7 @@
  *
  * Registra el menú "LMS Empresarial" y muestra el dashboard.
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -32,7 +32,7 @@ class LMS_Admin {
 			'LMS Empresarial',                 // Título de la pestaña del navegador.
 			'LMS Empresarial',                 // Texto que aparece en el menú lateral.
 			'manage_options',                  // Solo administradores pueden verlo.
-			'teems-lms',                       // Identificador único (slug) de la página.
+			'teamms-lms',                       // Identificador único (slug) de la página.
 			array( $this, 'render_dashboard' ),// Función que dibuja el contenido.
 			'dashicons-welcome-learn-more',    // Iconito del menú.
 			3                                  // Posición en el menú lateral.
@@ -43,14 +43,14 @@ class LMS_Admin {
 	 * Carga nuestro CSS SOLO en la página del LMS (no en todo wp-admin).
 	 */
 	public function enqueue_assets( $hook ) {
-		if ( 'toplevel_page_teems-lms' !== $hook ) {
+		if ( 'toplevel_page_teamms-lms' !== $hook ) {
 			return;
 		}
 		wp_enqueue_style(
-			'teems-lms-admin',
-			TEEMS_LMS_URL . 'diseno/css/lms-admin.css',
+			'teamms-lms-admin',
+			TEAMMS_LMS_URL . 'diseno/css/lms-admin.css',
 			array(),
-			TEEMS_LMS_VERSION
+			TEAMMS_LMS_VERSION
 		);
 	}
 
@@ -83,7 +83,7 @@ class LMS_Admin {
 
 		// Cargamos la vista (el HTML). Las variables $stats y $tablas_existentes
 		// quedan disponibles dentro de ese archivo.
-		require TEEMS_LMS_PATH . 'backend/admin/views/dashboard.php';
+		require TEAMMS_LMS_PATH . 'backend/admin/views/dashboard.php';
 	}
 }
 

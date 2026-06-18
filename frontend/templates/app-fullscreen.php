@@ -4,9 +4,9 @@
  *
  * No carga el header/footer del tema: solo lo mínimo de WordPress
  * (wp_head y wp_footer, necesarios para que carguen estilos y scripts)
- * más el contenido de la página (nuestro shortcode [teems_lms]).
+ * más el contenido de la página (nuestro shortcode [teamms_capacitaciones]).
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <body <?php body_class( 'lms-fullscreen' ); ?>>
 	<?php
 	// Recorremos la "consulta" de WordPress y mostramos el contenido de la
-	// página (que contiene el shortcode [teems_lms]).
+	// página (que contiene el shortcode [teamms_capacitaciones]).
 	while ( have_posts() ) {
 		the_post();
 		the_content();

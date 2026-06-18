@@ -11,7 +11,7 @@
  *   $verify_url  string       URL pública de verificación (la que codifica el QR)
  *   $back_url    string       volver a "Mis certificados"
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

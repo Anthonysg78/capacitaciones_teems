@@ -5,7 +5,7 @@
  * Acceso a la tabla wp_lms_modules. Un módulo pertenece a un curso
  * (course_id) y tiene un orden (order_index) dentro de ese curso.
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

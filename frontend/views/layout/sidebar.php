@@ -8,7 +8,7 @@
  *   $nav           array   ítems del menú [ clave => [ etiqueta, icono ] ]
  *   $vista_actual  string  vista activa
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -6,7 +6,7 @@
  * consultas (listar, buscar, crear, actualizar, borrar) usando $wpdb->prepare
  * para que sean seguras.
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

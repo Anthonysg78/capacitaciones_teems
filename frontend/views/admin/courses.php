@@ -8,7 +8,7 @@
  *   $list_url  string  URL base de esta lista
  *   $msg       string  mensaje de estado
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

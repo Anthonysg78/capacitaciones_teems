@@ -15,7 +15,7 @@
  *   $form_url         string  a dónde se envía (y se vuelve)
  *   $back_url         string  volver al curso
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

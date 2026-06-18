@@ -7,7 +7,7 @@
  *   $icono   string  clase del icono Bootstrap
  *   $texto   string  mensaje del estado vacío
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

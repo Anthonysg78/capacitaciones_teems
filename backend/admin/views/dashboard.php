@@ -6,7 +6,7 @@
  *   $stats             (array con conteos)
  *   $tablas_existentes (int, nº de tablas wp_lms_)
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -32,7 +32,7 @@ $db_ok = ( 15 === $tablas_existentes );
 			<h1 class="lms-hero__title">Capacitaciones Teamms</h1>
 			<p class="lms-hero__subtitle">Plataforma de capacitación empresarial · Panel de administración</p>
 		</div>
-		<span class="lms-badge-version">v<?php echo esc_html( TEEMS_LMS_VERSION ); ?></span>
+		<span class="lms-badge-version">v<?php echo esc_html( TEAMMS_LMS_VERSION ); ?></span>
 	</div>
 
 	<!-- Estado del sistema -->

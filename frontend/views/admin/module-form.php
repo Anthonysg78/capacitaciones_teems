@@ -8,7 +8,7 @@
  *   $modulos_url  string       URL de la lista de módulos (volver / redirigir)
  *   $next_order   int          siguiente orden sugerido
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

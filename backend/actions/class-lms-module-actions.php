@@ -5,7 +5,7 @@
  * Mismo patrón que los cursos: se procesa en 'template_redirect' (antes de
  * pintar HTML), con nonce y sanitización, y redirige con un mensaje.
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

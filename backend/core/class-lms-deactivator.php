@@ -8,7 +8,7 @@
  * Por eso NO borramos tablas ni datos aquí. Eso solo se haría en una rutina
  * de desinstalación (uninstall.php), si algún día el usuario lo decide.
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 // Guarda de seguridad.

@@ -5,7 +5,7 @@
  * Variables recibidas (conteos reales de la BD):
  *   $cursos, $modulos, $inscripciones, $certificados  int
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

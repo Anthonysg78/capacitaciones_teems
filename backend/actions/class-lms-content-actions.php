@@ -5,7 +5,7 @@
  * Mismo patrón que cursos, módulos y subtemas: 'template_redirect' + nonce
  * (protección CSRF) + sanitización de cada campo.
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

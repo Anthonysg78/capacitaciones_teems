@@ -16,16 +16,17 @@ y obtienen certificados con QR verificable. **Acceso solo por invitación. Sin r
 | Dato | Valor |
 |---|---|
 | WordPress | `C:\xampp\htdocs\wordpress-7.0\wordpress` |
-| Carpeta del plugin (se edita aquí) | `C:\Users\sagba\OneDrive\Escritorio\teems_capacitaciones` |
-| Enlace a WP | junction → `wp-content\plugins\teems_capacitaciones` |
+| Carpeta del plugin (se edita aquí) | `C:\Users\sagba\OneDrive\Escritorio\teamms_capacitaciones` |
+| Enlace a WP | junction → `wp-content\plugins\teamms_capacitaciones` |
 | URL admin | http://localhost/wordpress-7.0/wordpress/wp-admin |
-| Base de datos | `wordpress` · user `root` · sin pass · `127.0.0.1:3307` |
+| Sitio del LMS | `http://localhost/teamms` (WordPress dedicado, separado de Accons) |
+| Base de datos | `teamms_capacitaciones` · user `root` · sin pass · `127.0.0.1:3307` |
 | Prefijo de tablas | `wp_lms_` |
-| Shortcode de la app | `[teems_lms]` (en cualquier página → carga el LMS a pantalla completa) |
+| Shortcode de la app | `[teamms_capacitaciones]` (en cualquier página → carga el LMS a pantalla completa) |
 
-> **Nota de marca:** el producto se llama **Teamms** (texto visible). Los identificadores
-> internos de código (carpeta `teems_capacitaciones`, shortcode `teems_lms`, constantes
-> `TEEMS_LMS_*`) conservan el nombre antiguo para no romper instalaciones existentes.
+> **Nota de marca:** el producto se llama **Teamms** (texto visible). Algunos identificadores
+> internos de código (carpeta `teamms_capacitaciones`, constantes `TEAMMS_LMS_*`, text-domain
+> `teamms-lms`) conservan el nombre antiguo para no romper rutas/handles existentes.
 
 ---
 
@@ -36,8 +37,8 @@ y obtienen certificados con QR verificable. **Acceso solo por invitación. Sin r
 > en los controladores).
 
 ```
-teems_capacitaciones/
-├── teems-capacitaciones.php          ← archivo principal (cabecera + arranque)
+teamms_capacitaciones/
+├── teamms-capacitaciones.php          ← archivo principal (cabecera + arranque)
 │
 ├── backend/                          LÓGICA / SERVIDOR (no se ve)
 │   ├── core/                         ← activador (crea las 17 tablas), desactivador
@@ -82,8 +83,8 @@ teems_capacitaciones/
 > Aún **no** hay login real ni invitaciones (es lo siguiente).
 
 ### 🧱 Base e infraestructura
-- [x] Plugin instalable, activador con las **17 tablas** y desactivador seguro.
-- [x] App a **pantalla completa** vía shortcode `[teems_lms]`, con aislamiento de estilos/JS
+- [x] Plugin instalable, activador con las **15 tablas** y desactivador seguro.
+- [x] App a **pantalla completa** vía shortcode `[teamms_capacitaciones]`, con aislamiento de estilos/JS
       del tema y otros plugins (no se descuadra el layout).
 - [x] Diseño responsive (sidebar + topbar; en móvil, menú tipo cajón).
 - [x] Tres roles enrutados (admin / empresa / estudiante) — por ahora con selector demo.

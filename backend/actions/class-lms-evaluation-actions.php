@@ -8,7 +8,7 @@
  * Una pregunta cuenta como correcta solo si el conjunto elegido coincide
  * EXACTAMENTE con el conjunto de opciones correctas.
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

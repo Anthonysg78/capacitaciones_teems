@@ -8,7 +8,7 @@
  *   $completados  int    cursos completados (100%)
  *   $en_curso     int    cursos en progreso
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

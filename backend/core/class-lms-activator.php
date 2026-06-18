@@ -5,7 +5,7 @@
  * Se ejecuta UNA sola vez al activar el plugin desde wp-admin.
  * Responsabilidad: crear todas las tablas de la base de datos.
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 // Guarda de seguridad: nadie abre este archivo directo.
@@ -29,7 +29,7 @@ class LMS_Activator {
 
 		// Guardamos la versión de la base de datos. Nos servirá en el futuro
 		// para saber si hay que actualizar tablas cuando saquemos versiones nuevas.
-		update_option( 'teems_lms_db_version', TEEMS_LMS_VERSION );
+		update_option( 'teamms_lms_db_version', TEAMMS_LMS_VERSION );
 
 		// Limpiamos la caché de reglas de URL.
 		flush_rewrite_rules();

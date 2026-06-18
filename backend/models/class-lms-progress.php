@@ -7,7 +7,7 @@
  *
  * Centraliza también el cálculo del porcentaje de avance de un curso.
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

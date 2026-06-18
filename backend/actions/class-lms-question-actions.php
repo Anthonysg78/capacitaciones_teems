@@ -5,7 +5,7 @@
  * Mismo patrón: 'template_redirect' + nonce + sanitización. Una pregunta llega
  * con su enunciado, 4 opciones (option_text[]) y cuál es la correcta (correct).
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

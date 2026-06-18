@@ -18,7 +18,7 @@
  *   $rendir_url       string  URL para rendir
  *   $back_url         string  volver al curso
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

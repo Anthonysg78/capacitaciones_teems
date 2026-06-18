@@ -8,7 +8,7 @@
  *
  * Seguridad: nonce + permisos + sanitización (reglas del proyecto).
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

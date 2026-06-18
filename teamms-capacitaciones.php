@@ -1,14 +1,14 @@
 <?php
 /**
  * Plugin Name:       Capacitaciones Teamms
- * Plugin URI:        https://teems.local
+ * Plugin URI:        https://teamms.local
  * Description:       Plataforma de capacitación privada (LMS) para WordPress. Cursos, evaluaciones, certificados con QR e insignias. Acceso solo por invitación.
  * Version:           0.14.0
  * Requires at least: 6.0
  * Requires PHP:      8.0
  * Author:            Accons
  * License:           GPL-2.0-or-later
- * Text Domain:       teems-lms
+ * Text Domain:       teamms-lms
  */
 
 /*
@@ -34,10 +34,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * - URL:     dirección web pública (para cargar CSS, JS, imágenes).
  * - BASENAME: identificador del plugin que usa WordPress internamente.
  */
-define( 'TEEMS_LMS_VERSION', '0.14.0' );
-define( 'TEEMS_LMS_PATH', plugin_dir_path( __FILE__ ) );   // termina en \
-define( 'TEEMS_LMS_URL', plugin_dir_url( __FILE__ ) );     // termina en /
-define( 'TEEMS_LMS_BASENAME', plugin_basename( __FILE__ ) );
+define( 'TEAMMS_LMS_VERSION', '0.14.0' );
+define( 'TEAMMS_LMS_PATH', plugin_dir_path( __FILE__ ) );   // termina en \
+define( 'TEAMMS_LMS_URL', plugin_dir_url( __FILE__ ) );     // termina en /
+define( 'TEAMMS_LMS_BASENAME', plugin_basename( __FILE__ ) );
 
 /*
  * --------------------------------------------------------------------------
@@ -46,9 +46,9 @@ define( 'TEEMS_LMS_BASENAME', plugin_basename( __FILE__ ) );
  * Traemos los archivos que contienen la lógica de activar y desactivar.
  * Aún no ejecutamos nada: solo dejamos las clases disponibles.
  */
-require_once TEEMS_LMS_PATH . 'backend/core/class-lms-roles.php';
-require_once TEEMS_LMS_PATH . 'backend/core/class-lms-activator.php';
-require_once TEEMS_LMS_PATH . 'backend/core/class-lms-deactivator.php';
+require_once TEAMMS_LMS_PATH . 'backend/core/class-lms-roles.php';
+require_once TEAMMS_LMS_PATH . 'backend/core/class-lms-activator.php';
+require_once TEAMMS_LMS_PATH . 'backend/core/class-lms-deactivator.php';
 
 /*
  * --------------------------------------------------------------------------
@@ -71,33 +71,33 @@ register_deactivation_hook( __FILE__, array( 'LMS_Deactivator', 'deactivate' ) )
  * todos los plugins. Es el lugar correcto para iniciar nuestra lógica.
  * Por ahora solo dejamos la función lista; iremos llenándola semana a semana.
  */
-function teems_lms_run() {
+function teamms_lms_run() {
 	// Roles propios + control de acceso (bloquea wp-admin a usuarios externos).
 	new LMS_Roles();
 
 	// Autenticación propia del LMS (login/logout en el frontend).
-	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-auth-actions.php';
+	require_once TEAMMS_LMS_PATH . 'backend/actions/class-lms-auth-actions.php';
 	new LMS_Auth_Actions();
-	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-enroll-actions.php';
+	require_once TEAMMS_LMS_PATH . 'backend/actions/class-lms-enroll-actions.php';
 	new LMS_Enroll_Actions();
 
 	// Modelos (acceso a datos) — disponibles tanto en frontend como en backend.
-	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-course.php';
-	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-enrollment.php';
-	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-module.php';
-	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-content.php';
-	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-progress.php';
-	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-question.php';
-	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-evaluation.php';
-	require_once TEEMS_LMS_PATH . 'backend/models/class-lms-certificate.php';
+	require_once TEAMMS_LMS_PATH . 'backend/models/class-lms-course.php';
+	require_once TEAMMS_LMS_PATH . 'backend/models/class-lms-enrollment.php';
+	require_once TEAMMS_LMS_PATH . 'backend/models/class-lms-module.php';
+	require_once TEAMMS_LMS_PATH . 'backend/models/class-lms-content.php';
+	require_once TEAMMS_LMS_PATH . 'backend/models/class-lms-progress.php';
+	require_once TEAMMS_LMS_PATH . 'backend/models/class-lms-question.php';
+	require_once TEAMMS_LMS_PATH . 'backend/models/class-lms-evaluation.php';
+	require_once TEAMMS_LMS_PATH . 'backend/models/class-lms-certificate.php';
 
 	// Acciones de formularios: guardar/borrar cursos, módulos, contenidos, progreso, preguntas y evaluación.
-	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-course-actions.php';
-	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-module-actions.php';
-	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-content-actions.php';
-	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-progress-actions.php';
-	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-question-actions.php';
-	require_once TEEMS_LMS_PATH . 'backend/actions/class-lms-evaluation-actions.php';
+	require_once TEAMMS_LMS_PATH . 'backend/actions/class-lms-course-actions.php';
+	require_once TEAMMS_LMS_PATH . 'backend/actions/class-lms-module-actions.php';
+	require_once TEAMMS_LMS_PATH . 'backend/actions/class-lms-content-actions.php';
+	require_once TEAMMS_LMS_PATH . 'backend/actions/class-lms-progress-actions.php';
+	require_once TEAMMS_LMS_PATH . 'backend/actions/class-lms-question-actions.php';
+	require_once TEAMMS_LMS_PATH . 'backend/actions/class-lms-evaluation-actions.php';
 	new LMS_Course_Actions();
 	new LMS_Module_Actions();
 	new LMS_Content_Actions();
@@ -107,14 +107,14 @@ function teems_lms_run() {
 
 	// Si estamos dentro de wp-admin, cargamos el panel de administración.
 	if ( is_admin() ) {
-		require_once TEEMS_LMS_PATH . 'backend/admin/class-lms-admin.php';
+		require_once TEAMMS_LMS_PATH . 'backend/admin/class-lms-admin.php';
 		new LMS_Admin();
 	}
 
 	// Cargamos el frontend (registra los shortcodes de las páginas del LMS).
-	require_once TEEMS_LMS_PATH . 'frontend/class-lms-public.php';
+	require_once TEAMMS_LMS_PATH . 'frontend/class-lms-public.php';
 	new LMS_Public();
 
 	// Aquí, en próximas semanas, iniciaremos roles, etc.
 }
-add_action( 'plugins_loaded', 'teems_lms_run' );
+add_action( 'plugins_loaded', 'teamms_lms_run' );

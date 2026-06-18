@@ -10,7 +10,7 @@
  * NO contiene HTML: cada pantalla vive en su propio archivo dentro de
  * frontend/views/. Así el código queda separado y modular.
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class LMS_Public {
 
 	public function __construct() {
-		add_shortcode( 'teems_lms', array( $this, 'render' ) );
+		add_shortcode( 'teamms_capacitaciones', array( $this, 'render' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		// Prioridad alta (9999) para correr DESPUÉS de que el tema y otros
 		// plugins hayan encolado sus estilos, y así poder quitarlos.
@@ -41,7 +41,7 @@ class LMS_Public {
 			return false;
 		}
 		global $post;
-		return ( $post instanceof WP_Post ) && has_shortcode( $post->post_content, 'teems_lms' );
+		return ( $post instanceof WP_Post ) && has_shortcode( $post->post_content, 'teamms_capacitaciones' );
 	}
 
 	public function enqueue_assets() {
@@ -56,10 +56,10 @@ class LMS_Public {
 		remove_filter( 'the_content', 'wp_staticize_emoji' );
 		remove_filter( 'the_content_feed', 'wp_staticize_emoji' );
 
-		wp_enqueue_style( 'teems-bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css', array(), '5.3.3' );
-		wp_enqueue_style( 'teems-bootstrap-icons', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css', array(), '1.11.3' );
-		wp_enqueue_style( 'teems-lms-public', TEEMS_LMS_URL . 'diseno/css/lms-public.css', array( 'teems-bootstrap' ), TEEMS_LMS_VERSION );
-		wp_enqueue_script( 'teems-bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js', array(), '5.3.3', true );
+		wp_enqueue_style( 'teamms-bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css', array(), '5.3.3' );
+		wp_enqueue_style( 'teamms-bootstrap-icons', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css', array(), '1.11.3' );
+		wp_enqueue_style( 'teamms-lms-public', TEAMMS_LMS_URL . 'diseno/css/lms-public.css', array( 'teamms-bootstrap' ), TEAMMS_LMS_VERSION );
+		wp_enqueue_script( 'teamms-bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js', array(), '5.3.3', true );
 
 		// Editor de texto enriquecido (Quill) para el contenido tipo "texto".
 		// El JS se carga en el HEAD (in_footer = false) para que ya esté disponible
@@ -70,7 +70,7 @@ class LMS_Public {
 
 	public function load_app_template( $template ) {
 		if ( $this->page_has_shortcode() ) {
-			return TEEMS_LMS_PATH . 'frontend/templates/app-fullscreen.php';
+			return TEAMMS_LMS_PATH . 'frontend/templates/app-fullscreen.php';
 		}
 		return $template;
 	}
@@ -85,9 +85,9 @@ class LMS_Public {
 			return;
 		}
 		$conservar = array(
-			'teems-bootstrap',
-			'teems-bootstrap-icons',
-			'teems-lms-public',
+			'teamms-bootstrap',
+			'teamms-bootstrap-icons',
+			'teamms-lms-public',
 			'lms-quill',
 			'admin-bar',
 			'dashicons',
@@ -109,9 +109,9 @@ class LMS_Public {
 			return $tag;
 		}
 		$conservar = array(
-			'teems-bootstrap',
-			'teems-bootstrap-icons',
-			'teems-lms-public',
+			'teamms-bootstrap',
+			'teamms-bootstrap-icons',
+			'teamms-lms-public',
 			'lms-quill',
 			'admin-bar',
 			'dashicons',
@@ -129,7 +129,7 @@ class LMS_Public {
 			return $tag;
 		}
 		$conservar = array(
-			'teems-bootstrap',
+			'teamms-bootstrap',
 			'lms-quill',
 			'jquery',
 			'jquery-core',
@@ -151,7 +151,7 @@ class LMS_Public {
 		if ( ! empty( $vars ) ) {
 			extract( $vars, EXTR_SKIP ); // phpcs:ignore -- variables controladas por nosotros.
 		}
-		$ruta = TEEMS_LMS_PATH . 'frontend/views/' . $file . '.php';
+		$ruta = TEAMMS_LMS_PATH . 'frontend/views/' . $file . '.php';
 		if ( file_exists( $ruta ) ) {
 			include $ruta;
 		}

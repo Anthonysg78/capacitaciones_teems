@@ -9,7 +9,7 @@
  *   $cert    object|null  certificado encontrado (o null)
  *   $codigo  string       código consultado
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

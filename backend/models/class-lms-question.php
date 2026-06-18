@@ -5,7 +5,7 @@
  * Una pregunta pertenece a un módulo (module_id) y tiene varias opciones
  * (tabla question_options), de las cuales una está marcada como correcta.
  *
- * @package TeemsLMS
+ * @package TeammsLMS
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
