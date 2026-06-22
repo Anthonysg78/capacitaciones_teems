@@ -38,7 +38,9 @@ $login_url = ! empty( $invite ) ? add_query_arg( 'invite', $invite, $base ) : $b
 			<p class="lms-login__sub">Regístrate para acceder a la plataforma.</p>
 		<?php endif; ?>
 
-		<?php if ( 'datos' === $err ) : ?>
+		<?php if ( 'token' === $err ) : ?>
+			<div class="lms-notice lms-notice--err"><i class="bi bi-shield-exclamation"></i> Demasiados intentos con el código. Crea tu cuenta de nuevo para recibir uno nuevo.</div>
+		<?php elseif ( 'datos' === $err ) : ?>
 			<div class="lms-notice lms-notice--err"><i class="bi bi-exclamation-triangle"></i> Revisa los datos: nombre, correo válido y contraseña de al menos 6 caracteres.</div>
 		<?php elseif ( 'existe' === $err ) : ?>
 			<div class="lms-notice lms-notice--err"><i class="bi bi-info-circle"></i> Ese correo ya tiene cuenta. <a href="<?php echo esc_url( $login_url ); ?>">Inicia sesión</a>.</div>

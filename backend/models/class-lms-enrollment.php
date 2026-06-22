@@ -38,7 +38,7 @@ class LMS_Enrollment {
 
 	/**
 	 * Inscribe al usuario en el curso (si no lo estaba ya). Idempotente.
-	 * Devuelve true si quedó inscrito.
+	 * Devuelve true si quedó inscrito. 
 	 */
 	public static function enroll( $user_id, $course_id ) {
 		$user_id   = absint( $user_id );

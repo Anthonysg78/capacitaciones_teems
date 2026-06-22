@@ -3,7 +3,7 @@
  * Plugin Name:       Capacitaciones Teamms
  * Plugin URI:        https://teamms.local
  * Description:       Plataforma de capacitación privada (LMS) para WordPress. Cursos, evaluaciones, certificados con QR e insignias. Acceso solo por invitación.
- * Version:           0.14.0
+ * Version:           0.15.0
  * Requires at least: 6.0
  * Requires PHP:      8.0
  * Author:            Accons
@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * - URL:     dirección web pública (para cargar CSS, JS, imágenes).
  * - BASENAME: identificador del plugin que usa WordPress internamente.
  */
-define( 'TEAMMS_LMS_VERSION', '0.14.0' );
+define( 'TEAMMS_LMS_VERSION', '0.15.0' );
 define( 'TEAMMS_LMS_PATH', plugin_dir_path( __FILE__ ) );   // termina en \
 define( 'TEAMMS_LMS_URL', plugin_dir_url( __FILE__ ) );     // termina en /
 define( 'TEAMMS_LMS_BASENAME', plugin_basename( __FILE__ ) );
@@ -75,6 +75,10 @@ function teamms_lms_run() {
 	// Roles propios + control de acceso (bloquea wp-admin a usuarios externos).
 	new LMS_Roles();
 
+	// Remitente de marca para todos los correos del LMS (noreply@<dominio>).
+	require_once TEAMMS_LMS_PATH . 'backend/core/class-lms-mail.php';
+	new LMS_Mail();
+
 	// Autenticación propia del LMS (login/logout en el frontend).
 	require_once TEAMMS_LMS_PATH . 'backend/actions/class-lms-auth-actions.php';
 	new LMS_Auth_Actions();
@@ -84,6 +88,7 @@ function teamms_lms_run() {
 	// Modelos (acceso a datos) — disponibles tanto en frontend como en backend.
 	require_once TEAMMS_LMS_PATH . 'backend/models/class-lms-course.php';
 	require_once TEAMMS_LMS_PATH . 'backend/models/class-lms-enrollment.php';
+	require_once TEAMMS_LMS_PATH . 'backend/models/class-lms-user.php';
 	require_once TEAMMS_LMS_PATH . 'backend/models/class-lms-module.php';
 	require_once TEAMMS_LMS_PATH . 'backend/models/class-lms-content.php';
 	require_once TEAMMS_LMS_PATH . 'backend/models/class-lms-progress.php';
@@ -92,12 +97,14 @@ function teamms_lms_run() {
 	require_once TEAMMS_LMS_PATH . 'backend/models/class-lms-certificate.php';
 
 	// Acciones de formularios: guardar/borrar cursos, módulos, contenidos, progreso, preguntas y evaluación.
+	require_once TEAMMS_LMS_PATH . 'backend/actions/class-lms-user-actions.php';
 	require_once TEAMMS_LMS_PATH . 'backend/actions/class-lms-course-actions.php';
 	require_once TEAMMS_LMS_PATH . 'backend/actions/class-lms-module-actions.php';
 	require_once TEAMMS_LMS_PATH . 'backend/actions/class-lms-content-actions.php';
 	require_once TEAMMS_LMS_PATH . 'backend/actions/class-lms-progress-actions.php';
 	require_once TEAMMS_LMS_PATH . 'backend/actions/class-lms-question-actions.php';
 	require_once TEAMMS_LMS_PATH . 'backend/actions/class-lms-evaluation-actions.php';
+	new LMS_User_Actions();
 	new LMS_Course_Actions();
 	new LMS_Module_Actions();
 	new LMS_Content_Actions();

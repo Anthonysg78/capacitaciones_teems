@@ -239,6 +239,9 @@ class LMS_Public {
 			ob_start();
 			if ( 'registro' === $vista ) {
 				$this->view( 'auth/register', $datos );
+			} elseif ( 'confirmar' === $vista ) {
+				$datos['email_pend'] = isset( $_GET['email'] ) ? sanitize_email( wp_unslash( $_GET['email'] ) ) : '';
+				$this->view( 'auth/verify-code', $datos );
 			} else {
 				$this->view( 'auth/login', $datos );
 			}
@@ -315,8 +318,13 @@ class LMS_Public {
 			return;
 		}
 
+		// Sección Usuarios: lista + alta de cuentas.
+		if ( 'usuarios' === $vista ) {
+			$this->content_admin_usuarios();
+			return;
+		}
+
 		$secciones = array(
-			'usuarios'  => array( 'Usuarios', 'bi-people', 'Aquí crearás usuarios y enviarás invitaciones por email.' ),
 			'preguntas' => array( 'Banco de preguntas', 'bi-patch-question', 'Aquí administrarás las preguntas de cada módulo.' ),
 			'reportes'  => array( 'Reportes', 'bi-bar-chart', 'Aquí verás métricas globales y exportarás reportes.' ),
 		);
@@ -424,6 +432,30 @@ class LMS_Public {
 		}
 		$this->view( 'admin/courses', array(
 			'items'     => $items,
+			'nuevo_url' => add_query_arg( 'accion', 'nuevo', $list_url ),
+			'list_url'  => $list_url,
+			'msg'       => $msg,
+		) );
+	}
+
+	/**
+	 * Sección Usuarios del admin: lista de cuentas o formulario de alta.
+	 */
+	private function content_admin_usuarios() {
+		$accion   = isset( $_GET['accion'] ) ? sanitize_key( wp_unslash( $_GET['accion'] ) ) : 'lista';
+		$msg      = isset( $_GET['msg'] ) ? sanitize_key( wp_unslash( $_GET['msg'] ) ) : '';
+		// URL ABSOLUTA de la lista de usuarios (esta página + ?vista=usuarios).
+		$list_url = add_query_arg( 'vista', 'usuarios', get_permalink( get_the_ID() ) );
+
+		// Formulario de alta (página de respaldo sin JS).
+		if ( 'nuevo' === $accion ) {
+			$this->view( 'admin/user-form', array( 'list_url' => $list_url ) );
+			return;
+		}
+
+		// Por defecto: la lista de usuarios.
+		$this->view( 'admin/users', array(
+			'items'     => LMS_User::manageable(),
 			'nuevo_url' => add_query_arg( 'accion', 'nuevo', $list_url ),
 			'list_url'  => $list_url,
 			'msg'       => $msg,
@@ -608,5 +640,3 @@ class LMS_Public {
 	}
 
 }
-
-															

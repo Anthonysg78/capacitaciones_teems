@@ -10,7 +10,7 @@ y obtienen certificados con QR verificable. **Acceso solo por invitación. Sin r
 - **Stack:** PHP 8 puro · WordPress 6.x · MySQL/MariaDB · Bootstrap 5 (CDN) · jQuery · WordPress AJAX
 - **Sin** React, Node, Composer en servidor, REST API ni TypeScript.
 - **Instalación:** se distribuye como ZIP instalable desde wp-admin → Plugins → Subir plugin.
-- **Versión actual:** `0.14.x`
+- **Versión actual:** `0.15.x`
 
 ---
 
@@ -96,6 +96,8 @@ teamms_capacitaciones/
 
 ### 🛠️ Administrador
 - [x] **Dashboard** con estadísticas reales (cursos, módulos, inscripciones, certificados).
+- [x] **Usuarios:** lista de cuentas (con su perfil y nº de cursos), alta manual de
+      estudiantes/administradores y eliminación (limpia inscripciones y progreso).
 - [x] **Cursos:** crear, editar, publicar/borrador y borrar.
 - [x] **Estructura del curso** en una sola pantalla (árbol Módulo → Contenido),
       con modales para crear/editar sin cambiar de página.
