@@ -38,8 +38,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php foreach ( $cursos as $c ) : ?>
 			<?php $curso_url = add_query_arg( array( 'vista' => 'curso', 'id' => (int) $c['id'] ) ); ?>
 			<article class="lms-course">
-				<div class="lms-course__cover" style="background: linear-gradient(135deg, <?php echo esc_attr( $c['color'] ); ?> 0%, #0b1f4d 130%);">
-					<i class="bi bi-mortarboard"></i>
+				<div class="lms-course__cover" style="<?php if ( ! empty( $c['portada'] ) ) : ?>background-image: url('<?php echo esc_url( $c['portada'] ); ?>'); background-size: cover; background-position: center;<?php else : ?>background: linear-gradient(135deg, <?php echo esc_attr( $c['color'] ); ?> 0%, #0b1f4d 130%);<?php endif; ?>">
+					<?php if ( empty( $c['portada'] ) ) : ?><i class="bi bi-mortarboard"></i><?php endif; ?>
 				</div>
 				<div class="lms-course__body">
 					<h3 class="lms-course__title"><?php echo esc_html( $c['titulo'] ); ?></h3>

@@ -29,6 +29,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="lms-notice lms-notice--ok"><i class="bi bi-trash"></i> Curso eliminado.</div>
 <?php elseif ( 'error' === $msg ) : ?>
 	<div class="lms-notice lms-notice--err"><i class="bi bi-exclamation-triangle"></i> El título es obligatorio.</div>
+<?php elseif ( 'imagen' === $msg ) : ?>
+	<div class="lms-notice lms-notice--err"><i class="bi bi-exclamation-triangle"></i> No se pudo subir la portada. Usa una imagen JPG, PNG, WEBP o GIF.</div>
 <?php endif; ?>
 
 <?php if ( empty( $items ) ) : ?>
@@ -58,7 +60,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$desc = wp_trim_words( wp_strip_all_tags( (string) $c->description ), 16, '…' );
 			?>
 			<article class="lms-course">
-				<div class="lms-course__cover" style="background: linear-gradient(150deg, #2563eb 0%, #0b1f4d 120%);">
+				<div class="lms-course__cover" style="<?php if ( ! empty( $c->thumbnail_url ) ) : ?>background-image: url('<?php echo esc_url( $c->thumbnail_url ); ?>'); background-size: cover; background-position: center;<?php else : ?>background: linear-gradient(150deg, #2563eb 0%, #0b1f4d 120%);<?php endif; ?>">
 					<span class="lms-course__covertag <?php echo $c->published ? 'is-pub' : ''; ?>">
 						<?php echo $c->published ? 'Publicado' : 'Borrador'; ?>
 					</span>
@@ -80,6 +82,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						   data-id="<?php echo (int) $c->id; ?>"
 						   data-title="<?php echo esc_attr( $c->title ); ?>"
 						   data-desc="<?php echo esc_attr( $c->description ); ?>"
+						   data-cover="<?php echo esc_url( $c->thumbnail_url ); ?>"
 						   data-published="<?php echo (int) $c->published; ?>"><i class="bi bi-sliders"></i></a>
 						<a class="lms-iconbtn lms-iconbtn--danger" href="<?php echo esc_url( $borrar_url ); ?>" title="Borrar curso" onclick="return confirm('¿Borrar este curso? Esta acción no se puede deshacer.');"><i class="bi bi-trash"></i></a>
 					</div>
@@ -93,7 +96,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="modal fade lms-modal" id="lms-modal-curso" tabindex="-1" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered">
 		<div class="modal-content">
-			<form method="post" action="<?php echo esc_url( $list_url ); ?>">
+			<form method="post" action="<?php echo esc_url( $list_url ); ?>" enctype="multipart/form-data">
 				<input type="hidden" name="lms_action" value="save_course">
 				<input type="hidden" name="course_id" value="0" data-field="id">
 				<input type="hidden" name="redirect" value="<?php echo esc_url( $list_url ); ?>">
@@ -115,6 +118,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<label>
 							<input type="checkbox" name="published" value="1">
 							Publicar curso (si lo dejas sin marcar, queda como borrador)
+						</label>
+					</div>
+					<div class="lms-field">
+						<label>Portada del curso <small class="lms-muted">(imagen, opcional)</small></label>
+						<input type="hidden" name="current_cover" value="" data-field="cover">
+						<img data-cover-preview src="" alt="Portada actual" style="display:none; width:100%; max-height:140px; object-fit:cover; border-radius:8px; margin-bottom:8px;">
+						<input type="file" name="cover_file" accept="image/*">
+						<label class="lms-muted" style="display:block; margin-top:6px; font-weight:400;">
+							<input type="checkbox" name="remove_cover" value="1" data-field="remove_cover"> Quitar portada actual
 						</label>
 					</div>
 				</div>
@@ -148,6 +160,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 			var fT  = campo( modal, 'title' );          if ( fT )  { fT.value = d.title || ''; }
 			var fD  = campo( modal, 'description' );     if ( fD )  { fD.value = d.desc || ''; }
 			var fP  = campo( modal, 'published' );       if ( fP )  { fP.checked = esEdit ? ( d.published === '1' ) : false; }
+
+			// Portada: conservamos la actual (campo oculto) y mostramos vista previa.
+			var cover = esEdit ? ( d.cover || '' ) : '';
+			var fCov  = campoData( modal, 'cover' );        if ( fCov )  { fCov.value = cover; }
+			var fRem  = campo( modal, 'remove_cover' );     if ( fRem )  { fRem.checked = false; }
+			var fFile = campo( modal, 'cover_file' );        if ( fFile ) { fFile.value = ''; }
+			var prev  = modal.querySelector( '[data-cover-preview]' );
+			if ( prev ) {
+				if ( cover ) { prev.src = cover; prev.style.display = 'block'; }
+				else { prev.removeAttribute( 'src' ); prev.style.display = 'none'; }
+			}
 
 			bootstrap.Modal.getOrCreateInstance( modal ).show();
 		} );

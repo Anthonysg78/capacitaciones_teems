@@ -249,6 +249,27 @@ class LMS_Public {
 			return ob_get_clean();
 		}
 
+		// Reporte IMPRIMIBLE de una empresa (standalone, sin sidebar; para
+		// "Guardar como PDF"). Solo admin; con datos de avance de sus estudiantes.
+		if ( 'reporte_empresa' === $vista && ( current_user_can( 'manage_options' ) || current_user_can( 'lms_manage' ) ) ) {
+			$empresa = isset( $_GET['id'] ) ? LMS_Company::find( absint( $_GET['id'] ) ) : null;
+			if ( $empresa ) {
+				$estudiantes = array();
+				foreach ( LMS_Company::students( (int) $empresa->id ) as $e ) {
+					$e['avance']   = $this->avance_estudiante( $e['id'] );
+					$estudiantes[] = $e;
+				}
+				ob_start();
+				$this->view( 'admin/company-report', array(
+					'empresa'     => $empresa,
+					'estudiantes' => $estudiantes,
+					'fecha'       => date_i18n( 'd/m/Y H:i' ),
+					'volver_url'  => add_query_arg( array( 'vista' => 'empresas', 'accion' => 'ver', 'id' => (int) $empresa->id ), remove_query_arg( array( 'vista', 'id' ) ) ),
+				) );
+				return ob_get_clean();
+			}
+		}
+
 		// Ya con sesión: si pidió la vista 'login', lo llevamos a su panel.
 		if ( 'login' === $vista ) {
 			$vista = 'dashboard';
@@ -331,9 +352,14 @@ class LMS_Public {
 			return;
 		}
 
+		// Sección Reportes: métricas agrupadas por empresa.
+		if ( 'reportes' === $vista ) {
+			$this->content_admin_reportes();
+			return;
+		}
+
 		$secciones = array(
 			'preguntas' => array( 'Banco de preguntas', 'bi-patch-question', 'Aquí administrarás las preguntas de cada módulo.' ),
-			'reportes'  => array( 'Reportes', 'bi-bar-chart', 'Aquí verás métricas globales y exportarás reportes.' ),
 		);
 
 		if ( isset( $secciones[ $vista ] ) ) {
@@ -495,15 +521,43 @@ class LMS_Public {
 			return;
 		}
 
-		// Ver los estudiantes de una empresa.
+		// Ver los estudiantes de una empresa, cada uno con su % de avance.
 		if ( 'ver' === $accion ) {
 			$empresa = isset( $_GET['id'] ) ? LMS_Company::find( absint( $_GET['id'] ) ) : null;
 			if ( $empresa ) {
+				$estudiantes = array();
+				foreach ( LMS_Company::students( (int) $empresa->id ) as $e ) {
+					$a              = $this->avance_estudiante( $e['id'] );
+					$e['avance']    = $a['overall'];
+					$e['detalle_url'] = add_query_arg(
+						array( 'accion' => 'estudiante', 'id' => $e['id'], 'empresa' => (int) $empresa->id ),
+						$list_url
+					);
+					$estudiantes[] = $e;
+				}
 				$this->view( 'admin/company-students', array(
 					'empresa'      => $empresa,
-					'estudiantes'  => LMS_Company::students( (int) $empresa->id ),
+					'estudiantes'  => $estudiantes,
 					'list_url'     => $list_url,
 					'usuarios_url' => add_query_arg( 'vista', 'usuarios', get_permalink( get_the_ID() ) ),
+				) );
+				return;
+			}
+		}
+
+		// Detalle de un estudiante: cada curso con su barra de progreso.
+		if ( 'estudiante' === $accion ) {
+			$uid  = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : 0;
+			$user = $uid ? get_user_by( 'id', $uid ) : null;
+			if ( $user ) {
+				$emp_id   = isset( $_GET['empresa'] ) ? absint( $_GET['empresa'] ) : 0;
+				$back_url = $emp_id ? add_query_arg( array( 'accion' => 'ver', 'id' => $emp_id ), $list_url ) : $list_url;
+				$this->view( 'admin/student-progress', array(
+					'nombre'   => $user->display_name ? $user->display_name : $user->user_login,
+					'email'    => $user->user_email,
+					'empresa'  => $emp_id ? LMS_Company::name_of( $emp_id ) : '',
+					'avance'   => $this->avance_estudiante( $uid ),
+					'back_url' => $back_url,
 				) );
 				return;
 			}
@@ -523,6 +577,88 @@ class LMS_Public {
 			'list_url'  => $list_url,
 			'msg'       => $msg,
 		) );
+	}
+
+	/**
+	 * Sección Reportes: métricas agrupadas por empresa (más una fila "Sin
+	 * empresa"). Por cada grupo: estudiantes, inscripciones, cursos completados
+	 * y certificados emitidos.
+	 */
+	private function content_admin_reportes() {
+		global $wpdb;
+		$p            = $wpdb->prefix . 'lms_';
+		$empresas_url = add_query_arg( 'vista', 'empresas', get_permalink( get_the_ID() ) );
+
+		// Grupos: una por empresa + el grupo de estudiantes sin empresa.
+		$grupos = array();
+		foreach ( LMS_Company::all() as $empresa ) {
+			$grupos[] = array(
+				'id'   => (int) $empresa->id,
+				'name' => $empresa->name,
+				'ids'  => wp_list_pluck( LMS_Company::students( (int) $empresa->id ), 'id' ),
+			);
+		}
+		$grupos[] = array( 'id' => 0, 'name' => 'Sin empresa', 'ids' => $this->estudiantes_sin_empresa() );
+
+		$filas   = array();
+		$totales = array( 'estudiantes' => 0, 'inscripciones' => 0, 'completados' => 0, 'certificados' => 0 );
+
+		foreach ( $grupos as $g ) {
+			$ids   = array_map( 'absint', (array) $g['ids'] );
+			$stats = array( 'estudiantes' => count( $ids ), 'inscripciones' => 0, 'completados' => 0, 'certificados' => 0 );
+			if ( $ids ) {
+				// $ids ya son enteros (absint): seguro interpolarlos en IN(...).
+				$in = implode( ',', $ids );
+				$stats['inscripciones'] = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$p}enrollments WHERE user_id IN ($in)" );
+				$stats['completados']   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$p}enrollments WHERE completed_at IS NOT NULL AND user_id IN ($in)" );
+				$stats['certificados']  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$p}certificates WHERE user_id IN ($in)" );
+			}
+			$ver_url = $g['id'] ? add_query_arg( array( 'accion' => 'ver', 'id' => $g['id'] ), $empresas_url ) : '';
+			$pdf_url = $g['id'] ? add_query_arg( array( 'vista' => 'reporte_empresa', 'id' => $g['id'] ), $empresas_url ) : '';
+			$filas[] = array_merge( array( 'id' => $g['id'], 'name' => $g['name'], 'ver_url' => $ver_url, 'pdf_url' => $pdf_url ), $stats );
+			foreach ( $totales as $k => $v ) {
+				$totales[ $k ] += $stats[ $k ];
+			}
+		}
+
+		$this->view( 'admin/reports', array( 'filas' => $filas, 'totales' => $totales ) );
+	}
+
+	/** IDs de estudiantes que NO tienen empresa asignada. */
+	private function estudiantes_sin_empresa() {
+		$users = get_users( array(
+			'role'       => 'lms_student',
+			'fields'     => 'ID',
+			'meta_query' => array(
+				array( 'key' => LMS_Company::META_KEY, 'compare' => 'NOT EXISTS' ),
+			),
+		) );
+		return array_map( 'absint', $users );
+	}
+
+	/**
+	 * Avance de un estudiante: % por curso y promedio general.
+	 * Devuelve [ overall (int 0-100), n (nº cursos), cursos => [ title, pct, completo ] ].
+	 */
+	private function avance_estudiante( $user_id ) {
+		$cursos  = LMS_User::enrolled_courses( $user_id );
+		$detalle = array();
+		$suma    = 0;
+		foreach ( $cursos as $c ) {
+			$pct       = LMS_Progress::course_percent( $user_id, (int) $c->id );
+			$detalle[] = array(
+				'title'    => $c->title,
+				'pct'      => $pct,
+				'completo' => ( 100 === (int) $pct ),
+			);
+			$suma += $pct;
+		}
+		$n = count( $detalle );
+		return array(
+			'overall' => $n ? (int) round( $suma / $n ) : 0,
+			'n'       => $n,
+			'cursos'  => $detalle,
+		);
 	}
 
 	private function content_estudiante( $vista ) {
@@ -561,6 +697,7 @@ class LMS_Public {
 				'progreso' => LMS_Progress::course_percent( $uid, (int) $curso->id ),
 				'modulos'  => LMS_Module::count_by_course( (int) $curso->id ),
 				'color'    => $paleta[ $i % count( $paleta ) ],
+				'portada'  => (string) $curso->thumbnail_url,
 			);
 		}
 		$this->view( 'student/courses', array(

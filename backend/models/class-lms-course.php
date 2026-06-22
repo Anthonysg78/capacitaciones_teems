@@ -71,11 +71,12 @@ class LMS_Course {
 		$ok = $wpdb->insert(
 			self::table(),
 			array(
-				'title'       => $data['title'],
-				'description' => $data['description'],
-				'published'   => $data['published'] ? 1 : 0,
+				'title'         => $data['title'],
+				'description'   => $data['description'],
+				'published'     => $data['published'] ? 1 : 0,
+				'thumbnail_url' => $data['thumbnail_url'] ?? '',
 			),
-			array( '%s', '%s', '%d' ) // formatos: texto, texto, número.
+			array( '%s', '%s', '%d', '%s' ) // formatos: texto, texto, número, texto.
 		);
 		return $ok ? (int) $wpdb->insert_id : 0;
 	}
@@ -88,16 +89,26 @@ class LMS_Course {
 	 */
 	public static function update( $id, $data ) {
 		global $wpdb;
+		$campos   = array(
+			'title'       => $data['title'],
+			'description' => $data['description'],
+			'published'   => $data['published'] ? 1 : 0,
+		);
+		$formatos = array( '%s', '%s', '%d' );
+
+		// La portada solo se toca si viene en $data (así no la borramos sin querer
+		// al guardar desde sitios que no la mandan).
+		if ( array_key_exists( 'thumbnail_url', $data ) ) {
+			$campos['thumbnail_url'] = $data['thumbnail_url'];
+			$formatos[]              = '%s';
+		}
+
 		$res = $wpdb->update(
 			self::table(),
-			array(
-				'title'       => $data['title'],
-				'description' => $data['description'],
-				'published'   => $data['published'] ? 1 : 0,
-			),
+			$campos,
 			array( 'id' => absint( $id ) ),
-			array( '%s', '%s', '%d' ), // formatos de los datos.
-			array( '%d' )              // formato del WHERE.
+			$formatos,
+			array( '%d' ) // formato del WHERE.
 		);
 		return false !== $res;
 	}

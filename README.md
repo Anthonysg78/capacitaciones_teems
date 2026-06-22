@@ -1,5 +1,6 @@
 # Capacitaciones Teamms — Plugin LMS para WordPress
 
+
 Plataforma de capacitación privada para WordPress. El administrador crea cursos e invita
 estudiantes por link; los estudiantes avanzan por el contenido, rinden evaluaciones
 y obtienen certificados con QR verificable. **Acceso solo por invitación. Sin registro público.**

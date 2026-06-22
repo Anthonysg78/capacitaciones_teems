@@ -63,6 +63,22 @@ class LMS_Course_Actions {
 			$this->redirigir( 'error' );
 		}
 
+		// Portada (imagen). Conservamos la actual salvo que suban una nueva o
+		// marquen "quitar". Se sube a /uploads con wp_handle_upload (no requiere
+		// la capacidad upload_files ni la Biblioteca de Medios).
+		$portada = esc_url_raw( wp_unslash( $_POST['current_cover'] ?? '' ) );
+		if ( ! empty( $_POST['remove_cover'] ) ) {
+			$portada = '';
+		}
+		if ( ! empty( $_FILES['cover_file']['name'] ) ) {
+			$subida = $this->subir_portada();
+			if ( is_wp_error( $subida ) ) {
+				$this->redirigir( 'imagen' );
+			}
+			$portada = $subida;
+		}
+		$data['thumbnail_url'] = $portada;
+
 		if ( $id ) {
 			// Edición: guardamos y volvemos a donde estábamos (la lista).
 			LMS_Course::update( $id, $data );
@@ -99,6 +115,27 @@ class LMS_Course_Actions {
 			LMS_Course::delete( $id );
 		}
 		$this->redirigir( 'deleted' );
+	}
+
+	/**
+	 * Sube la imagen de portada a /uploads y devuelve su URL, o un WP_Error.
+	 * Solo acepta imágenes. Usa wp_handle_upload (sin Biblioteca de Medios).
+	 */
+	private function subir_portada() {
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+
+		$archivo = $_FILES['cover_file'];
+		$tipo    = wp_check_filetype( $archivo['name'] );
+		$ok_ext  = array( 'jpg', 'jpeg', 'png', 'webp', 'gif' );
+		if ( ! in_array( strtolower( (string) $tipo['ext'] ), $ok_ext, true ) ) {
+			return new WP_Error( 'tipo', 'Formato de imagen no permitido.' );
+		}
+
+		$res = wp_handle_upload( $archivo, array( 'test_form' => false ) );
+		if ( isset( $res['error'] ) || empty( $res['url'] ) ) {
+			return new WP_Error( 'upload', isset( $res['error'] ) ? $res['error'] : 'No se pudo subir la imagen.' );
+		}
+		return $res['url'];
 	}
 
 	/**
