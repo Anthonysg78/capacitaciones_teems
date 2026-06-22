@@ -48,6 +48,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</select>
 	</div>
 
+	<div class="lms-field">
+		<label for="lms-company">Empresa <small class="lms-muted">(solo estudiantes)</small></label>
+		<select id="lms-company" name="company_id">
+			<option value="0">— Sin empresa —</option>
+			<?php foreach ( $empresas as $emp ) : ?>
+				<option value="<?php echo (int) $emp->id; ?>"><?php echo esc_html( $emp->name ); ?></option>
+			<?php endforeach; ?>
+		</select>
+	</div>
+
 	<div class="lms-form__actions">
 		<button type="submit" class="lms-course__btn"><i class="bi bi-person-plus"></i> Crear usuario</button>
 		<a class="lms-btn-ghost" href="<?php echo esc_url( $list_url ); ?>">Cancelar</a>

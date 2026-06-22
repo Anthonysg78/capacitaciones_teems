@@ -36,14 +36,18 @@ class LMS_User {
 		) );
 		$lista = array();
 		foreach ( $users as $u ) {
+			$es_admin = self::is_admin_user( $u );
+			// La empresa solo aplica a estudiantes (los admins no se agrupan).
+			$company_id = ( ! $es_admin && class_exists( 'LMS_Company' ) ) ? LMS_Company::of_user( (int) $u->ID ) : 0;
 			$lista[] = array(
-				'id'        => (int) $u->ID,
-				'nombre'    => $u->display_name ? $u->display_name : $u->user_login,
-				'email'     => $u->user_email,
-				'perfil'    => self::role_key( $u ),
-				'perfil_lbl'=> self::role_label( $u ),
-				'alta'      => $u->user_registered,
-				'cursos'    => self::count_courses( (int) $u->ID ),
+				'id'         => (int) $u->ID,
+				'nombre'     => $u->display_name ? $u->display_name : $u->user_login,
+				'email'      => $u->user_email,
+				'perfil'     => self::role_key( $u ),
+				'perfil_lbl' => self::role_label( $u ),
+				'alta'       => $u->user_registered,
+				'cursos'     => self::count_courses( (int) $u->ID ),
+				'company_id' => $company_id,
 			);
 		}
 		return $lista;

@@ -33,6 +33,11 @@ class LMS_User_Actions {
 		// Borrar (enlace GET con nonce).
 		if ( isset( $_GET['lms_action'] ) && 'delete_user' === $_GET['lms_action'] ) {
 			$this->delete();
+			return;
+		}
+		// Asignar/cambiar la empresa de un estudiante (desde el listado).
+		if ( isset( $_POST['lms_action'] ) && 'set_user_company' === $_POST['lms_action'] ) {
+			$this->set_company();
 		}
 	}
 
@@ -65,7 +70,30 @@ class LMS_User_Actions {
 		if ( is_wp_error( $user_id ) ) {
 			$this->redirigir( 'datos' );
 		}
+
+		// Empresa: solo aplica a estudiantes (los admins no se agrupan).
+		if ( 'lms_student' === $role && class_exists( 'LMS_Company' ) ) {
+			$company_id = isset( $_POST['company_id'] ) ? absint( $_POST['company_id'] ) : 0;
+			LMS_Company::assign( $user_id, $company_id );
+		}
 		$this->redirigir( 'saved' );
+	}
+
+	/**
+	 * Asignar / cambiar / quitar la empresa de un estudiante desde el listado.
+	 */
+	private function set_company() {
+		if ( ! current_user_can( 'lms_manage' ) ) {
+			$this->redirigir( 'denied' );
+		}
+		$id    = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : 0;
+		$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
+		if ( ! $id || ! wp_verify_nonce( $nonce, 'lms_set_user_company_' . $id ) ) {
+			$this->redirigir( 'expired' );
+		}
+		$company_id = isset( $_POST['company_id'] ) ? absint( $_POST['company_id'] ) : 0;
+		LMS_Company::assign( $id, $company_id );
+		$this->redirigir( 'company' );
 	}
 
 	/**

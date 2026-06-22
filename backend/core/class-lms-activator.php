@@ -36,6 +36,23 @@ class LMS_Activator {
 	}
 
 	/**
+	 * Migración ligera SIN reactivar el plugin.
+	 *
+	 * Corre en cada carga (plugins_loaded), pero solo HACE algo cuando la
+	 * versión guardada en BD no coincide con la del plugin: entonces re-ejecuta
+	 * create_tables() (dbDelta es idempotente: crea lo que falte, no toca lo que
+	 * ya existe) y actualiza la versión. Así, al subir una versión nueva con
+	 * tablas nuevas (p. ej. 'companies'), se crean solas.
+	 */
+	public static function maybe_upgrade() {
+		if ( get_option( 'teamms_lms_db_version' ) === TEAMMS_LMS_VERSION ) {
+			return;
+		}
+		self::create_tables();
+		update_option( 'teamms_lms_db_version', TEAMMS_LMS_VERSION );
+	}
+
+	/**
 	 * Crea todas las tablas del LMS.
 	 *
 	 * Usamos dbDelta(): la forma oficial y segura de WordPress para crear
@@ -220,6 +237,15 @@ class LMS_Activator {
 			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id),
 			KEY user_id (user_id)
+		) $collate;";
+
+		// 15) Empresas. Solo AGRUPAN estudiantes (sin login ni panel): cada
+		// estudiante guarda su empresa en el user_meta 'lms_company_id'.
+		$sql[] = "CREATE TABLE {$prefix}companies (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			name varchar(255) NOT NULL,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY  (id)
 		) $collate;";
 
 		// Ejecutamos cada CREATE TABLE con dbDelta.

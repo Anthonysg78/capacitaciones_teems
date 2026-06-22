@@ -175,6 +175,7 @@ class LMS_Public {
 				'dashboard' => array( 'Panel',           'bi-grid-1x2-fill' ),
 				'cursos'    => array( 'Cursos',          'bi-book' ),
 				'usuarios'  => array( 'Usuarios',        'bi-people' ),
+				'empresas'  => array( 'Empresas',        'bi-building' ),
 				'preguntas' => array( 'Banco preguntas', 'bi-patch-question' ),
 				'reportes'  => array( 'Reportes',        'bi-bar-chart' ),
 			);
@@ -324,6 +325,12 @@ class LMS_Public {
 			return;
 		}
 
+		// Sección Empresas: lista + alta/edición (agrupan estudiantes).
+		if ( 'empresas' === $vista ) {
+			$this->content_admin_empresas();
+			return;
+		}
+
 		$secciones = array(
 			'preguntas' => array( 'Banco de preguntas', 'bi-patch-question', 'Aquí administrarás las preguntas de cada módulo.' ),
 			'reportes'  => array( 'Reportes', 'bi-bar-chart', 'Aquí verás métricas globales y exportarás reportes.' ),
@@ -447,15 +454,71 @@ class LMS_Public {
 		// URL ABSOLUTA de la lista de usuarios (esta página + ?vista=usuarios).
 		$list_url = add_query_arg( 'vista', 'usuarios', get_permalink( get_the_ID() ) );
 
+		$empresas = LMS_Company::all();
+
 		// Formulario de alta (página de respaldo sin JS).
 		if ( 'nuevo' === $accion ) {
-			$this->view( 'admin/user-form', array( 'list_url' => $list_url ) );
+			$this->view( 'admin/user-form', array(
+				'list_url' => $list_url,
+				'empresas' => $empresas,
+			) );
 			return;
 		}
 
 		// Por defecto: la lista de usuarios.
 		$this->view( 'admin/users', array(
 			'items'     => LMS_User::manageable(),
+			'empresas'  => $empresas,
+			'nuevo_url' => add_query_arg( 'accion', 'nuevo', $list_url ),
+			'list_url'  => $list_url,
+			'msg'       => $msg,
+		) );
+	}
+
+	/**
+	 * Sección Empresas del admin: lista de empresas o formulario (crear/editar).
+	 * La empresa solo AGRUPA estudiantes (no inicia sesión).
+	 */
+	private function content_admin_empresas() {
+		$accion   = isset( $_GET['accion'] ) ? sanitize_key( wp_unslash( $_GET['accion'] ) ) : 'lista';
+		$msg      = isset( $_GET['msg'] ) ? sanitize_key( wp_unslash( $_GET['msg'] ) ) : '';
+		$list_url = add_query_arg( 'vista', 'empresas', get_permalink( get_the_ID() ) );
+
+		// Formulario de empresa (crear / editar) — página de respaldo sin JS.
+		// El flujo normal usa el modal de la lista.
+		if ( 'nuevo' === $accion || 'editar' === $accion ) {
+			$empresa = ( 'editar' === $accion && isset( $_GET['id'] ) ) ? LMS_Company::find( absint( $_GET['id'] ) ) : null;
+			$this->view( 'admin/company-form', array(
+				'empresa'  => $empresa,
+				'list_url' => $list_url,
+			) );
+			return;
+		}
+
+		// Ver los estudiantes de una empresa.
+		if ( 'ver' === $accion ) {
+			$empresa = isset( $_GET['id'] ) ? LMS_Company::find( absint( $_GET['id'] ) ) : null;
+			if ( $empresa ) {
+				$this->view( 'admin/company-students', array(
+					'empresa'      => $empresa,
+					'estudiantes'  => LMS_Company::students( (int) $empresa->id ),
+					'list_url'     => $list_url,
+					'usuarios_url' => add_query_arg( 'vista', 'usuarios', get_permalink( get_the_ID() ) ),
+				) );
+				return;
+			}
+		}
+
+		// Por defecto: la lista de empresas, cada una con su nº de estudiantes.
+		$items = array();
+		foreach ( LMS_Company::all() as $empresa ) {
+			$items[] = array(
+				'empresa'     => $empresa,
+				'estudiantes' => LMS_Company::count_students( (int) $empresa->id ),
+			);
+		}
+		$this->view( 'admin/companies', array(
+			'items'     => $items,
 			'nuevo_url' => add_query_arg( 'accion', 'nuevo', $list_url ),
 			'list_url'  => $list_url,
 			'msg'       => $msg,

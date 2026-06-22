@@ -27,6 +27,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="lms-notice lms-notice--ok"><i class="bi bi-check-circle"></i> Usuario creado correctamente.</div>
 <?php elseif ( 'deleted' === $msg ) : ?>
 	<div class="lms-notice lms-notice--ok"><i class="bi bi-trash"></i> Usuario eliminado.</div>
+<?php elseif ( 'company' === $msg ) : ?>
+	<div class="lms-notice lms-notice--ok"><i class="bi bi-building-check"></i> Empresa del estudiante actualizada.</div>
 <?php elseif ( 'existe' === $msg ) : ?>
 	<div class="lms-notice lms-notice--err"><i class="bi bi-exclamation-triangle"></i> Ya existe una cuenta con ese correo.</div>
 <?php elseif ( 'datos' === $msg ) : ?>
@@ -52,6 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<tr>
 					<th>Usuario</th>
 					<th>Perfil</th>
+					<th>Empresa</th>
 					<th>Cursos</th>
 					<th>Alta</th>
 					<th class="lms-table__actions">Acciones</th>
@@ -80,6 +83,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<div style="color: var(--muted); font-size: 13px;"><?php echo esc_html( $u['email'] ); ?></div>
 						</td>
 						<td><span class="lms-tag <?php echo $es_admin ? 'lms-tag--ok' : 'lms-tag--draft'; ?>"><?php echo esc_html( $u['perfil_lbl'] ); ?></span></td>
+						<td>
+							<?php if ( $es_admin ) : ?>
+								<span style="color: var(--muted);">—</span>
+							<?php else : ?>
+								<form method="post" action="<?php echo esc_url( $list_url ); ?>" style="margin:0;">
+									<input type="hidden" name="lms_action" value="set_user_company">
+									<input type="hidden" name="id" value="<?php echo (int) $u['id']; ?>">
+									<input type="hidden" name="redirect" value="<?php echo esc_url( $list_url ); ?>">
+									<?php wp_nonce_field( 'lms_set_user_company_' . (int) $u['id'] ); ?>
+									<select name="company_id" onchange="this.form.submit()" class="lms-select">
+										<option value="0"><?php esc_html_e( '— Sin empresa —', 'teamms' ); ?></option>
+										<?php foreach ( $empresas as $emp ) : ?>
+											<option value="<?php echo (int) $emp->id; ?>" <?php selected( (int) $u['company_id'], (int) $emp->id ); ?>><?php echo esc_html( $emp->name ); ?></option>
+										<?php endforeach; ?>
+									</select>
+								</form>
+							<?php endif; ?>
+						</td>
 						<td><span class="lms-pill <?php echo $u['cursos'] ? 'lms-pill--ok' : ''; ?>"><?php echo (int) $u['cursos']; ?></span></td>
 						<td><?php echo esc_html( $alta ); ?></td>
 						<td class="lms-table__actions">
@@ -126,6 +147,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<select name="role">
 							<option value="lms_student" selected>Estudiante</option>
 							<option value="lms_admin">Administrador</option>
+						</select>
+					</div>
+					<div class="lms-field">
+						<label>Empresa <small class="lms-muted">(solo estudiantes)</small></label>
+						<select name="company_id">
+							<option value="0">— Sin empresa —</option>
+							<?php foreach ( $empresas as $emp ) : ?>
+								<option value="<?php echo (int) $emp->id; ?>"><?php echo esc_html( $emp->name ); ?></option>
+							<?php endforeach; ?>
 						</select>
 					</div>
 				</div>
